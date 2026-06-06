@@ -28,6 +28,7 @@ export const useSOS = () => {
   const { session } = useAuth();
   const router = useRouter();
   const stopWatchRef = useRef<(() => void) | null>(null);
+  const lastLocationUpdateRef = useRef(0);
 
   const syncOfflineSOS = useCallback(async () => {
     if (!offlineSOSQueue.hasPending() || !navigator.onLine) return;
@@ -86,9 +87,14 @@ export const useSOS = () => {
 
   useEffect(() => {
     if (state !== 'active' || !alert || alert.sync_status === 'pending') return;
-    const stop = watchPosition(alert.id, async (coords) => {
+    const alertId = alert.id;
+    const stop = watchPosition(alertId, async (coords) => {
+      const now = Date.now();
+      if (now - lastLocationUpdateRef.current < 10000) return;
+      lastLocationUpdateRef.current = now;
+
       try {
-        await sosService.updateLocation(alert.id, {
+        await sosService.updateLocation(alertId, {
           latitude: coords.latitude,
           longitude: coords.longitude,
           accuracy: coords.accuracy ?? undefined,
@@ -99,7 +105,7 @@ export const useSOS = () => {
     });
     stopWatchRef.current = stop;
     return stop;
-  }, [state, alert, watchPosition]);
+  }, [state, alert?.id, alert?.sync_status, watchPosition]);
 
   const triggerSOS = useCallback(async () => {
     try {
