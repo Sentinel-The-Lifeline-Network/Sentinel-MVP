@@ -41,7 +41,7 @@ export default function ContactsPage() {
 
   const handleSave = async () => {
     if (!form.full_name.trim() || !form.phone.trim() || !form.email.trim() || !form.relationship.trim()) {
-      setFormError('Name, WhatsApp number, working email, and relationship are required.');
+      setFormError('Name, SMS-capable phone number, working email, and relationship are required.');
       return;
     }
     if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) {
@@ -241,13 +241,13 @@ export default function ContactsPage() {
                 {editingContact ? 'Edit Contact' : 'New Contact'}
               </h3>
               <p className="text-xs text-muted leading-relaxed mb-5">
-                Use a WhatsApp-enabled phone number and a working email. Sentinel sends SOS alerts automatically through both channels and repeats them every 5 minutes until you mark safe or cancel.
+                Use an SMS-capable phone number and a working email. Sentinel sends SOS alerts automatically through both channels and repeats them every 5 minutes until you mark safe or cancel.
               </p>
 
               <div className="space-y-4">
                 {[
                   { key: 'full_name', label: 'Full Name *', placeholder: 'Jane Doe', type: 'text' },
-                  { key: 'phone', label: 'WhatsApp Number *', placeholder: '+234 800 000 0000', type: 'tel' },
+                  { key: 'phone', label: 'SMS Phone Number *', placeholder: '+234 800 000 0000', type: 'tel' },
                   { key: 'email', label: 'Working Email *', placeholder: 'jane@email.com', type: 'email' },
                 ].map((field) => (
                   <div key={field.key}>
@@ -297,7 +297,7 @@ export default function ContactsPage() {
                 <div className="flex items-center justify-between py-1">
                   <div>
                     <p className="text-sm font-semibold text-white">Alert on SOS</p>
-                    <p className="text-xs text-muted">Automatically message this contact on WhatsApp and email</p>
+                    <p className="text-xs text-muted">Automatically message this contact by SMS and email</p>
                   </div>
                   <button
                     onClick={() => setForm((f) => ({ ...f, notification_enabled: !f.notification_enabled }))}

@@ -46,7 +46,7 @@ export default function ActiveAlertPage() {
   const timelineSteps = [
     { label: 'Alert triggered', time: alert?.started_at ? new Date(alert.started_at).toLocaleTimeString() : undefined, done: true },
     { label: 'Location captured', time: alert?.last_location_timestamp ? new Date(alert.last_location_timestamp).toLocaleTimeString() : undefined, done: !!alert?.last_latitude },
-    { label: 'WhatsApp and email alerts sent automatically', done: alert?.sync_status !== 'pending' },
+    { label: 'SMS and email alerts sent automatically', done: alert?.sync_status !== 'pending' },
     { label: 'Repeat notifications active every 5 minutes', done: alert?.sync_status !== 'pending' },
     { label: 'Live location tracking active', done: state === 'active' },
   ];
@@ -102,7 +102,7 @@ export default function ActiveAlertPage() {
           <div className="grid grid-cols-3 gap-2">
             {[
               { label: 'GPS', value: alert?.last_latitude ? 'Active' : 'Searching', color: alert?.last_latitude ? '#10B981' : '#F59E0B', icon: 'GPS' },
-              { label: 'Contacts', value: alert?.sync_status === 'pending' ? 'Queued' : 'Auto-sent', color: alert?.sync_status === 'pending' ? '#F59E0B' : '#10B981', icon: 'WA' },
+              { label: 'Contacts', value: alert?.sync_status === 'pending' ? 'Queued' : 'Auto-sent', color: alert?.sync_status === 'pending' ? '#F59E0B' : '#10B981', icon: 'SMS' },
               { label: 'Tracking', value: trackingUrl ? 'Live' : 'Pending', color: trackingUrl ? '#EF4444' : '#F59E0B', icon: 'LIVE' },
             ].map((s) => (
               <div key={s.label} className="glass-card rounded-2xl p-3 text-center">
@@ -132,7 +132,7 @@ export default function ActiveAlertPage() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-white">Contacts notified automatically</p>
-                    <p className="text-xs text-muted mt-0.5">WhatsApp and email alerts are sent immediately from the SOS request. Repeat messages continue every 5 minutes until you mark safe or cancel.</p>
+                    <p className="text-xs text-muted mt-0.5">SMS and email alerts are sent immediately from the SOS request. Repeat messages continue every 5 minutes until you mark safe or cancel.</p>
                   </div>
                 </div>
               </div>

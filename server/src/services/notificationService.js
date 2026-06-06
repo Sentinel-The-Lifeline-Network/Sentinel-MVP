@@ -1,7 +1,9 @@
 const supabase = require('../config/supabase');
 const { frontendUrl, notifications: notificationConfig, nodeEnv } = require('../config');
+const nodemailer = require('nodemailer');
 
 const activeNotificationJobs = new Map();
+let mailTransporter;
 
 const log = (...args) => {
   if (nodeEnv !== 'test') console.log('[Notification]', ...args);
@@ -41,7 +43,7 @@ const finalMessage = (alert, status) => {
   ].join('\n');
 };
 
-const normalizeWhatsappNumber = (phone) => {
+const normalizePhoneNumber = (phone) => {
   const digits = String(phone || '').replace(/\D/g, '');
   if (!digits) return '';
 
@@ -57,55 +59,74 @@ const normalizeWhatsappNumber = (phone) => {
   return digits;
 };
 
-const sendWhatsapp = async (contact, message) => {
-  const normalizedPhone = normalizeWhatsappNumber(contact.phone);
-  log('WhatsApp send attempt', {
+const sendSms = async (contact, message) => {
+  const normalizedPhone = normalizePhoneNumber(contact.phone);
+  const recipient = normalizedPhone ? `+${normalizedPhone}` : '';
+
+  log('SMS send attempt', {
     contactId: contact.id,
     phoneLast4: normalizedPhone.slice(-4),
     normalizedPhoneLength: normalizedPhone.length,
-    hasAccessToken: Boolean(notificationConfig.whatsappAccessToken),
-    hasPhoneNumberId: Boolean(notificationConfig.whatsappPhoneNumberId),
+    hasApiKey: Boolean(notificationConfig.africasTalkingApiKey),
+    username: notificationConfig.africasTalkingUsername,
+    hasSenderId: Boolean(notificationConfig.africasTalkingSenderId),
   });
 
   if (!normalizedPhone) {
-    throw new Error(`WhatsApp phone number is empty or invalid for contact ${contact.id}`);
+    throw new Error(`SMS phone number is empty or invalid for contact ${contact.id}`);
   }
 
-  if (!notificationConfig.whatsappAccessToken || !notificationConfig.whatsappPhoneNumberId) {
+  if (!notificationConfig.africasTalkingApiKey || !notificationConfig.africasTalkingUsername) {
     if (nodeEnv === 'production') {
-      throw new Error('WhatsApp credentials are missing. Set WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID.');
+      throw new Error('Africa\'s Talking credentials are missing. Set AFRICAS_TALKING_API_KEY and AFRICAS_TALKING_USERNAME.');
     }
-    log(`WhatsApp fallback to ${contact.phone}: ${message}`);
+    log(`SMS fallback to ${contact.phone}: ${message}`);
     return { status: 'sent', provider: 'development-log' };
   }
 
-  const res = await fetch(
-    `https://graph.facebook.com/v19.0/${notificationConfig.whatsappPhoneNumberId}/messages`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${notificationConfig.whatsappAccessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        messaging_product: 'whatsapp',
-        to: normalizedPhone,
-        type: 'text',
-        text: { preview_url: true, body: message },
-      }),
-    }
-  );
+  const payload = new URLSearchParams({
+    username: notificationConfig.africasTalkingUsername,
+    to: recipient,
+    message,
+  });
+
+  if (notificationConfig.africasTalkingSenderId) {
+    payload.set('from', notificationConfig.africasTalkingSenderId);
+  }
+
+  const res = await fetch('https://api.africastalking.com/version1/messaging', {
+    method: 'POST',
+    headers: {
+      apikey: notificationConfig.africasTalkingApiKey,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: payload.toString(),
+  });
 
   const body = await res.text();
-  if (!res.ok) throw new Error(`WhatsApp delivery failed with ${res.status}: ${body}`);
+  if (!res.ok) throw new Error(`SMS delivery failed with ${res.status}: ${body}`);
 
-  log('WhatsApp send success', {
+  log('SMS send success', {
     contactId: contact.id,
     phoneLast4: normalizedPhone.slice(-4),
     status: res.status,
     providerResponse: body,
   });
-  return { status: 'sent', provider: 'whatsapp-cloud' };
+  return { status: 'sent', provider: 'africas-talking' };
+};
+
+const getMailTransporter = () => {
+  if (!mailTransporter) {
+    mailTransporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: notificationConfig.gmailUser,
+        pass: notificationConfig.gmailAppPassword,
+      },
+    });
+  }
+
+  return mailTransporter;
 };
 
 const sendEmail = async (contact, subject, message) => {
@@ -113,41 +134,31 @@ const sendEmail = async (contact, subject, message) => {
     contactId: contact.id,
     email: contact.email,
     from: notificationConfig.emailFrom,
-    hasResendApiKey: Boolean(notificationConfig.resendApiKey),
+    hasGmailUser: Boolean(notificationConfig.gmailUser),
+    hasGmailAppPassword: Boolean(notificationConfig.gmailAppPassword),
   });
 
-  if (!notificationConfig.resendApiKey) {
+  if (!notificationConfig.gmailUser || !notificationConfig.gmailAppPassword) {
     if (nodeEnv === 'production') {
-      throw new Error('Resend API key is missing. Set RESEND_API_KEY.');
+      throw new Error('Gmail SMTP credentials are missing. Set GMAIL_USER and GMAIL_APP_PASSWORD.');
     }
     log(`Email fallback to ${contact.email}: ${subject}\n${message}`);
     return { status: 'sent', provider: 'development-log' };
   }
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${notificationConfig.resendApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: notificationConfig.emailFrom,
-      to: [contact.email],
-      subject,
-      text: message,
-    }),
+  const info = await getMailTransporter().sendMail({
+    from: notificationConfig.emailFrom || notificationConfig.gmailUser,
+    to: contact.email,
+    subject,
+    text: message,
   });
-
-  const body = await res.text();
-  if (!res.ok) throw new Error(`Email delivery failed with ${res.status}: ${body}`);
 
   log('Email send success', {
     contactId: contact.id,
     email: contact.email,
-    status: res.status,
-    providerResponse: body,
+    messageId: info.messageId,
   });
-  return { status: 'sent', provider: 'resend' };
+  return { status: 'sent', provider: 'gmail-smtp' };
 };
 
 const logNotification = async ({ alertId, contactId, channel, status }) => {
@@ -165,7 +176,7 @@ const logNotification = async ({ alertId, contactId, channel, status }) => {
 const deliverToContact = async ({ alert, contact, subject, message }) => {
   const deliveries = [];
 
-  if (contact.phone) deliveries.push(['whatsapp', () => sendWhatsapp(contact, message)]);
+  if (contact.phone) deliveries.push(['sms', () => sendSms(contact, message)]);
   if (contact.email) deliveries.push(['email', () => sendEmail(contact, subject, message)]);
 
   log('Delivering to contact', {
@@ -232,8 +243,8 @@ const startRecurringEmergencyNotifications = async (alert, contacts, options = {
     contactCount: contacts.length,
     sendImmediately,
     repeatIntervalMs: notificationConfig.repeatIntervalMs,
-    hasWhatsappConfig: Boolean(notificationConfig.whatsappAccessToken && notificationConfig.whatsappPhoneNumberId),
-    hasEmailConfig: Boolean(notificationConfig.resendApiKey),
+    hasSmsConfig: Boolean(notificationConfig.africasTalkingApiKey && notificationConfig.africasTalkingUsername),
+    hasEmailConfig: Boolean(notificationConfig.gmailUser && notificationConfig.gmailAppPassword),
   });
 
   if (sendImmediately) {
@@ -358,6 +369,6 @@ module.exports = {
   resumeActiveEmergencyNotifications,
   _private: {
     enabledContacts,
-    normalizeWhatsappNumber,
+    normalizePhoneNumber,
   },
 };

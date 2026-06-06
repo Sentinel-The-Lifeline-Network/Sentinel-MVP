@@ -29,9 +29,11 @@ module.exports = {
   },
   notifications: {
     repeatIntervalMs: parseInteger(process.env.NOTIFICATION_REPEAT_INTERVAL_MS, 5 * 60 * 1000),
-    whatsappAccessToken: process.env.WHATSAPP_ACCESS_TOKEN,
-    whatsappPhoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID,
-    resendApiKey: process.env.RESEND_API_KEY,
-    emailFrom: process.env.EMAIL_FROM || 'Sentinel <onboarding@resend.dev>',
+    africasTalkingApiKey: process.env.AFRICAS_TALKING_API_KEY,
+    africasTalkingUsername: process.env.AFRICAS_TALKING_USERNAME || 'sandbox',
+    africasTalkingSenderId: process.env.AFRICAS_TALKING_SENDER_ID,
+    gmailUser: process.env.GMAIL_USER,
+    gmailAppPassword: process.env.GMAIL_APP_PASSWORD,
+    emailFrom: process.env.EMAIL_FROM || process.env.GMAIL_USER,
   },
 };

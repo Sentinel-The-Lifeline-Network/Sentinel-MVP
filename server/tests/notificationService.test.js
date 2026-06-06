@@ -7,11 +7,19 @@ jest.mock('../src/config', () => ({
   nodeEnv: 'test',
   notifications: {
     repeatIntervalMs: 5 * 60 * 1000,
-    whatsappAccessToken: undefined,
-    whatsappPhoneNumberId: undefined,
-    resendApiKey: undefined,
+    africasTalkingApiKey: undefined,
+    africasTalkingUsername: 'sandbox',
+    africasTalkingSenderId: undefined,
+    gmailUser: undefined,
+    gmailAppPassword: undefined,
     emailFrom: 'Sentinel <alerts@example.com>',
   },
+}));
+
+jest.mock('nodemailer', () => ({
+  createTransport: jest.fn(() => ({
+    sendMail: jest.fn().mockResolvedValue({ messageId: 'test-message-id' }),
+  })),
 }));
 
 const supabase = require('../src/config/supabase');
@@ -89,9 +97,10 @@ describe('notificationService', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
-    delete process.env.WHATSAPP_ACCESS_TOKEN;
-    delete process.env.WHATSAPP_PHONE_NUMBER_ID;
-    delete process.env.RESEND_API_KEY;
+    delete process.env.AFRICAS_TALKING_API_KEY;
+    delete process.env.AFRICAS_TALKING_USERNAME;
+    delete process.env.GMAIL_USER;
+    delete process.env.GMAIL_APP_PASSWORD;
   });
 
   afterEach(() => {
@@ -106,16 +115,16 @@ describe('notificationService', () => {
 
     expect(insert).toHaveBeenCalledTimes(4);
     expect(insert.mock.calls.map(([payload]) => payload.channel)).toEqual(
-      expect.arrayContaining(['whatsapp', 'email', 'whatsapp', 'email'])
+      expect.arrayContaining(['sms', 'email', 'sms', 'email'])
     );
     expect(insert.mock.calls.map(([payload]) => payload.contact_id)).not.toContain('contact-disabled');
   });
 
-  it('normalizes Nigerian WhatsApp numbers before provider delivery', () => {
-    expect(_private.normalizeWhatsappNumber('+234 801 111 1111')).toBe('2348011111111');
-    expect(_private.normalizeWhatsappNumber('08011111111')).toBe('2348011111111');
-    expect(_private.normalizeWhatsappNumber('8011111111')).toBe('2348011111111');
-    expect(_private.normalizeWhatsappNumber('002348011111111')).toBe('2348011111111');
+  it('normalizes Nigerian phone numbers before SMS provider delivery', () => {
+    expect(_private.normalizePhoneNumber('+234 801 111 1111')).toBe('2348011111111');
+    expect(_private.normalizePhoneNumber('08011111111')).toBe('2348011111111');
+    expect(_private.normalizePhoneNumber('8011111111')).toBe('2348011111111');
+    expect(_private.normalizePhoneNumber('002348011111111')).toBe('2348011111111');
   });
 
   it('targets every enabled contact that has a phone or email', () => {
@@ -150,7 +159,7 @@ describe('notificationService', () => {
     expect(alertQuery.maybeSingle).not.toHaveBeenCalled();
     expect(insert).toHaveBeenCalledTimes(4);
     expect(insert.mock.calls.map(([payload]) => payload.channel)).toEqual(
-      expect.arrayContaining(['whatsapp', 'email'])
+      expect.arrayContaining(['sms', 'email'])
     );
   });
 });
