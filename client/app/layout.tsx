@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     siteName: 'Sentinel',
     title: SEO.title,
     description: SEO.description,
-    images: [{ url: SEO.ogImage, width: 1200, height: 630, alt: 'Sentinel emergency response app' }],
+    images: [{ url: SEO.ogImage, width: 1200, height: 630, alt: 'Sentinel lifeline network' }],
   },
   twitter: {
     card: 'summary_large_image',
