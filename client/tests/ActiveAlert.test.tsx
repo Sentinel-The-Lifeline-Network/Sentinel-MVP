@@ -49,6 +49,11 @@ describe('ActiveAlertPage', () => {
     expect(screen.getByText(/Emergency Mode/i)).toBeInTheDocument();
   });
 
+  it('starts elapsed time at 00:00', () => {
+    render(<ActiveAlertPage />);
+    expect(screen.getByText('00:00')).toBeInTheDocument();
+  });
+
   it('renders Mark Myself Safe button', () => {
     render(<ActiveAlertPage />);
     expect(screen.getByText(/Mark Myself Safe/i)).toBeInTheDocument();

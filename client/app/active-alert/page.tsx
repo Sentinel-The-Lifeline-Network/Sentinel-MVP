@@ -7,10 +7,18 @@ import LocationCard from '@/components/LocationCard';
 import PinConfirmModal from '@/components/PinConfirmModal';
 import { useSOS } from '@/hooks/useSOS';
 
+const formatElapsed = (totalSeconds: number) => {
+  const safeSeconds = Math.max(0, totalSeconds);
+  const minutes = Math.floor(safeSeconds / 60);
+  const seconds = safeSeconds % 60;
+
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
 export default function ActiveAlertPage() {
   const { state, alert, error, syncStatus, initialized, markSafe, stopAlert } = useSOS();
   const router = useRouter();
-  const [elapsed, setElapsed] = useState('0:00');
+  const [elapsed, setElapsed] = useState('00:00');
   const [showMarkSafeModal, setShowMarkSafeModal] = useState(false);
   const [showStopModal, setShowStopModal] = useState(false);
   const [stopping, setStopping] = useState(false);
@@ -20,16 +28,20 @@ export default function ActiveAlertPage() {
   }, [initialized, state, router]);
 
   useEffect(() => {
-    if (!alert?.started_at) return;
-    const start = new Date(alert.started_at).getTime();
+    if (!alert?.id || state !== 'active') {
+      setElapsed('00:00');
+      return;
+    }
+
+    const start = Date.now();
     const tick = () => {
       const diff = Math.floor((Date.now() - start) / 1000);
-      setElapsed(`${Math.floor(diff / 60)}:${String(diff % 60).padStart(2, '0')}`);
+      setElapsed(formatElapsed(diff));
     };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [alert?.started_at]);
+  }, [alert?.id, state]);
 
   const timelineSteps = [
     { label: 'Alert triggered', time: alert?.started_at ? new Date(alert.started_at).toLocaleTimeString() : undefined, done: true },
