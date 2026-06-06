@@ -343,8 +343,7 @@ const resumeActiveEmergencyNotifications = async () => {
       const contacts = await getContactsForNotification(alert.user_id, userName);
       await startRecurringEmergencyNotifications(
         { ...alert, user_name: userName },
-        contacts,
-        { sendImmediately: false }
+        contacts
       );
     })
   );

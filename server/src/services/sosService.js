@@ -16,9 +16,22 @@ const getUserName = async (userId) => {
   return data?.full_name || 'A Sentinel user';
 };
 
+const getNotificationContacts = async (userId, userName) =>
+  (await contactsService.getContacts(userId)).map((contact) => ({
+    ...contact,
+    user_name: userName,
+  }));
+
+const notifyActiveAlert = async (alert, userId) => {
+  const userName = await getUserName(userId);
+  const contacts = await getNotificationContacts(userId, userName);
+  await startRecurringEmergencyNotifications({ ...alert, user_name: userName }, contacts);
+};
+
 const triggerSOS = async (userId, { latitude, longitude }) => {
   const existingActive = await getActiveAlert(userId);
   if (existingActive) {
+    await notifyActiveAlert(existingActive, userId);
     throw Object.assign(new Error('An active SOS alert already exists'), { statusCode: 409 });
   }
 
@@ -49,12 +62,7 @@ const triggerSOS = async (userId, { latitude, longitude }) => {
     });
   }
 
-  const userName = await getUserName(userId);
-  const contacts = (await contactsService.getContacts(userId)).map((contact) => ({
-    ...contact,
-    user_name: userName,
-  }));
-  await startRecurringEmergencyNotifications({ ...alert, user_name: userName }, contacts);
+  await notifyActiveAlert(alert, userId);
 
   return alert;
 };
@@ -84,10 +92,7 @@ const markSafe = async (alertId, userId) => {
   if (!data) throw Object.assign(new Error('No active alert found'), { statusCode: 404 });
 
   const userName = await getUserName(userId);
-  const contacts = (await contactsService.getContacts(userId)).map((contact) => ({
-    ...contact,
-    user_name: userName,
-  }));
+  const contacts = await getNotificationContacts(userId, userName);
   await notifyAlertClosed({ ...previousAlert, ...data, user_name: userName }, contacts, 'resolved');
 
   return data;
@@ -107,10 +112,7 @@ const stopAlert = async (alertId, userId) => {
   if (!data) throw Object.assign(new Error('No active alert found'), { statusCode: 404 });
 
   const userName = await getUserName(userId);
-  const contacts = (await contactsService.getContacts(userId)).map((contact) => ({
-    ...contact,
-    user_name: userName,
-  }));
+  const contacts = await getNotificationContacts(userId, userName);
   await notifyAlertClosed({ ...previousAlert, ...data, user_name: userName }, contacts, 'cancelled');
 
   return data;

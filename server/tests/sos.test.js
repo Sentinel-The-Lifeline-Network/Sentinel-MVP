@@ -29,7 +29,15 @@ jest.mock('../src/middleware/rateLimiter', () => ({
   generalLimiter: (req, res, next) => next(),
 }));
 
+jest.mock('../src/services/notificationService', () => ({
+  startRecurringEmergencyNotifications: jest.fn(),
+  notifyAlertClosed: jest.fn(),
+}));
+
 const supabase = require('../src/config/supabase');
+const {
+  startRecurringEmergencyNotifications,
+} = require('../src/services/notificationService');
 
 describe('SOS API', () => {
   afterEach(() => jest.clearAllMocks());
@@ -48,6 +56,7 @@ describe('SOS API', () => {
           },
           error: null,
         })
+        .mockResolvedValueOnce({ data: { full_name: 'Test User' }, error: null })
         .mockResolvedValueOnce({ data: [], error: null });
 
       supabase.from.mockReturnThis();
@@ -59,13 +68,20 @@ describe('SOS API', () => {
 
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
+      expect(startRecurringEmergencyNotifications).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'alert-1', user_name: 'Test User' }),
+        []
+      );
     });
 
     it('should return 409 when active alert already exists', async () => {
       supabase.maybeSingle.mockResolvedValueOnce({
-        data: { id: 'existing-alert', status: 'active' },
+        data: { id: 'existing-alert', user_id: 'test-user-id', status: 'active' },
         error: null,
       });
+      supabase.single
+        .mockResolvedValueOnce({ data: { full_name: 'Test User' }, error: null })
+        .mockResolvedValueOnce({ data: [], error: null });
 
       const res = await request(app)
         .post('/api/sos/trigger')
@@ -73,6 +89,10 @@ describe('SOS API', () => {
         .send({ latitude: 6.5244, longitude: 3.3792 });
 
       expect(res.status).toBe(409);
+      expect(startRecurringEmergencyNotifications).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'existing-alert', user_name: expect.any(String) }),
+        []
+      );
     });
 
     it('should return 422 for invalid coordinates', async () => {
