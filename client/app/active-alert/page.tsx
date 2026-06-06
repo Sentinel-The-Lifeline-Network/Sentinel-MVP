@@ -49,7 +49,7 @@ export default function ActiveAlertPage() {
   const [stopping, setStopping] = useState(false);
 
   useEffect(() => {
-    if (initialized && state === 'idle') router.push('/');
+    if (initialized && state === 'idle') router.replace('/');
   }, [initialized, state, router]);
 
   useEffect(() => {

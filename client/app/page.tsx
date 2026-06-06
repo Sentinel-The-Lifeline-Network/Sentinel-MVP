@@ -14,7 +14,7 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (state === 'active') router.push('/active-alert');
+    if (state === 'active') router.replace('/active-alert');
   }, [state, router]);
 
   return (

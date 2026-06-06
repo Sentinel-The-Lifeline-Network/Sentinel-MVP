@@ -120,7 +120,7 @@ export const useSOS = () => {
       }
       setAlert(newAlert);
       setState('active');
-      router.push('/active-alert');
+      router.replace('/active-alert');
     } catch (err: any) {
       if (err instanceof NetworkError || !navigator.onLine) {
         const coords = await getCurrentPosition();
@@ -136,7 +136,7 @@ export const useSOS = () => {
           .then((registration) => (registration as ServiceWorkerWithSync).sync?.register('sentinel-sync-sos'))
           .catch(() => {});
 
-        router.push('/active-alert');
+        router.replace('/active-alert');
         return;
       }
 
@@ -146,7 +146,7 @@ export const useSOS = () => {
           setAlert(existing);
           setState('active');
           setInitialized(true);
-          router.push('/active-alert');
+          router.replace('/active-alert');
           return;
         }
       }
@@ -165,14 +165,14 @@ export const useSOS = () => {
           setAlert(null);
           setSyncStatus(null);
           setState('idle');
-          router.push('/');
+          router.replace('/');
           return;
         }
         const updated = await sosService.markSafe(alert.id, pin);
         storeNotificationSummary(updated);
         setAlert(updated);
         setState('idle');
-        router.push('/');
+        router.replace('/');
       } catch (err: any) {
         setError(err.message);
         setState('active');
@@ -191,14 +191,14 @@ export const useSOS = () => {
           setAlert(null);
           setSyncStatus(null);
           setState('idle');
-          router.push('/');
+          router.replace('/');
           return;
         }
         const updated = await sosService.stopAlert(alert.id, pin);
         storeNotificationSummary(updated);
         setAlert(updated);
         setState('idle');
-        router.push('/');
+        router.replace('/');
       } catch (err: any) {
         setError(err.message);
         setState('active');

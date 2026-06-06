@@ -1,12 +1,8 @@
-const CACHE_NAME = 'sentinel-v2';
+const CACHE_NAME = 'sentinel-v4';
 const OFFLINE_URL = '/offline';
 
 const PRECACHE_URLS = [
-  '/',
   '/offline',
-  '/contacts',
-  '/history',
-  '/profile',
   '/manifest.json',
   '/icons/icon.svg',
 ];
@@ -22,7 +18,11 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    ).then(() =>
+      self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+    ).then((clients) => {
+      clients.forEach((client) => client.postMessage({ type: 'SENTINEL_SW_UPDATED' }));
+    })
   );
   self.clients.claim();
 });

@@ -86,7 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </AuthProvider>
         <script
           dangerouslySetInnerHTML={{
-            __html: `if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').catch(()=>{});})}`,
+            __html: `if('serviceWorker'in navigator){let refreshing=false;window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js').then((registration)=>{registration.update().catch(()=>{});}).catch(()=>{});navigator.serviceWorker.addEventListener('message',(event)=>{if(event.data?.type==='SENTINEL_SW_UPDATED'&&!refreshing){refreshing=true;window.location.reload();}});navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!refreshing){refreshing=true;window.location.reload();}});});}`,
           }}
         />
       </body>
