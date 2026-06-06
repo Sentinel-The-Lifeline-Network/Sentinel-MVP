@@ -41,18 +41,40 @@ const finalMessage = (alert, status) => {
   ].join('\n');
 };
 
-const normalizeWhatsappNumber = (phone) => phone.replace(/[^\d+]/g, '').replace(/^\+/, '');
+const normalizeWhatsappNumber = (phone) => {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (!digits) return '';
+
+  if (digits.startsWith('00')) return digits.slice(2);
+  if (digits.startsWith('234')) return digits;
+
+  // Nigeria local mobile format: 070..., 080..., 090... -> 23470..., 23480..., 23490...
+  if (digits.startsWith('0') && digits.length >= 10) return `234${digits.slice(1)}`;
+
+  // Nigeria mobile without leading zero: 70..., 80..., 90... -> 23470..., 23480..., 23490...
+  if (/^[789]\d{9}$/.test(digits)) return `234${digits}`;
+
+  return digits;
+};
 
 const sendWhatsapp = async (contact, message) => {
   const normalizedPhone = normalizeWhatsappNumber(contact.phone);
   log('WhatsApp send attempt', {
     contactId: contact.id,
     phoneLast4: normalizedPhone.slice(-4),
+    normalizedPhoneLength: normalizedPhone.length,
     hasAccessToken: Boolean(notificationConfig.whatsappAccessToken),
     hasPhoneNumberId: Boolean(notificationConfig.whatsappPhoneNumberId),
   });
 
+  if (!normalizedPhone) {
+    throw new Error(`WhatsApp phone number is empty or invalid for contact ${contact.id}`);
+  }
+
   if (!notificationConfig.whatsappAccessToken || !notificationConfig.whatsappPhoneNumberId) {
+    if (nodeEnv === 'production') {
+      throw new Error('WhatsApp credentials are missing. Set WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID.');
+    }
     log(`WhatsApp fallback to ${contact.phone}: ${message}`);
     return { status: 'sent', provider: 'development-log' };
   }
@@ -95,6 +117,9 @@ const sendEmail = async (contact, subject, message) => {
   });
 
   if (!notificationConfig.resendApiKey) {
+    if (nodeEnv === 'production') {
+      throw new Error('Resend API key is missing. Set RESEND_API_KEY.');
+    }
     log(`Email fallback to ${contact.email}: ${subject}\n${message}`);
     return { status: 'sent', provider: 'development-log' };
   }
@@ -332,4 +357,8 @@ module.exports = {
   stopRecurringEmergencyNotifications,
   notifyAlertClosed,
   resumeActiveEmergencyNotifications,
+  _private: {
+    enabledContacts,
+    normalizeWhatsappNumber,
+  },
 };

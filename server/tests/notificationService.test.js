@@ -19,6 +19,7 @@ const {
   startRecurringEmergencyNotifications,
   stopRecurringEmergencyNotifications,
   notifyAlertClosed,
+  _private,
 } = require('../src/services/notificationService');
 
 const repeatIntervalMs = 5 * 60 * 1000;
@@ -108,6 +109,21 @@ describe('notificationService', () => {
       expect.arrayContaining(['whatsapp', 'email', 'whatsapp', 'email'])
     );
     expect(insert.mock.calls.map(([payload]) => payload.contact_id)).not.toContain('contact-disabled');
+  });
+
+  it('normalizes Nigerian WhatsApp numbers before provider delivery', () => {
+    expect(_private.normalizeWhatsappNumber('+234 801 111 1111')).toBe('2348011111111');
+    expect(_private.normalizeWhatsappNumber('08011111111')).toBe('2348011111111');
+    expect(_private.normalizeWhatsappNumber('8011111111')).toBe('2348011111111');
+    expect(_private.normalizeWhatsappNumber('002348011111111')).toBe('2348011111111');
+  });
+
+  it('targets every enabled contact that has a phone or email', () => {
+    expect(_private.enabledContacts(contacts).map((contact) => contact.id)).toEqual([
+      'contact-phone-email',
+      'contact-phone',
+      'contact-email',
+    ]);
   });
 
   it('repeats emergency notifications every 5 minutes while the alert remains active', async () => {
