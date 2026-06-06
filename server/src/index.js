@@ -30,6 +30,12 @@ app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '10kb' }));
 app.use(morgan(nodeEnv === 'production' ? 'combined' : 'dev', { skip: () => nodeEnv === 'test' }));
 app.use(generalLimiter);
+app.use('/api', (req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.set('Pragma', 'no-cache');
+  res.set('Expires', '0');
+  next();
+});
 
 app.get('/health', (req, res) => res.json({ status: 'ok', service: 'sentinel-api' }));
 

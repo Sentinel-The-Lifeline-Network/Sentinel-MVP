@@ -2,11 +2,19 @@ const sosService = require('../services/sosService');
 const locationService = require('../services/locationService');
 const { verifyPin } = require('../utils/hashPin');
 const supabase = require('../config/supabase');
+const { nodeEnv } = require('../config');
 const { success, error } = require('../utils/response');
 
 const triggerSOS = async (req, res, next) => {
   try {
     const { latitude, longitude } = req.body;
+    if (nodeEnv !== 'test') {
+      console.log('[Sentinel API] SOS trigger request received', {
+        userId: req.user.id,
+        hasLatitude: latitude !== undefined && latitude !== null,
+        hasLongitude: longitude !== undefined && longitude !== null,
+      });
+    }
     const alert = await sosService.triggerSOS(req.user.id, { latitude, longitude });
     success(res, alert, 201);
   } catch (err) {
