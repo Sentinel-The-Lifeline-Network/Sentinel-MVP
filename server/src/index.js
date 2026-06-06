@@ -8,6 +8,16 @@ const { errorHandler, notFound } = require('./middleware/errorHandler');
 const { generalLimiter } = require('./middleware/rateLimiter');
 
 const app = express();
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error(`Origin not allowed by CORS: ${origin}`));
+  },
+  credentials: true,
+};
 
 app.disable('x-powered-by');
 app.use(
@@ -15,18 +25,8 @@ app.use(
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-        return;
-      }
-      callback(new Error('Origin not allowed by CORS'));
-    },
-    credentials: true,
-  })
-);
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '10kb' }));
 app.use(morgan(nodeEnv === 'production' ? 'combined' : 'dev', { skip: () => nodeEnv === 'test' }));
 app.use(generalLimiter);

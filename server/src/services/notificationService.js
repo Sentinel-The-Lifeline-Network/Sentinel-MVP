@@ -3,6 +3,14 @@ const { frontendUrl, notifications: notificationConfig, nodeEnv } = require('../
 
 const activeNotificationJobs = new Map();
 
+const log = (...args) => {
+  if (nodeEnv !== 'test') console.log('[Notification]', ...args);
+};
+
+const logError = (...args) => {
+  if (nodeEnv !== 'test') console.error('[Notification]', ...args);
+};
+
 const enabledContacts = (contacts = []) =>
   contacts.filter((contact) => contact.notification_enabled !== false && (contact.phone || contact.email));
 
@@ -36,8 +44,16 @@ const finalMessage = (alert, status) => {
 const normalizeWhatsappNumber = (phone) => phone.replace(/[^\d+]/g, '').replace(/^\+/, '');
 
 const sendWhatsapp = async (contact, message) => {
+  const normalizedPhone = normalizeWhatsappNumber(contact.phone);
+  log('WhatsApp send attempt', {
+    contactId: contact.id,
+    phoneLast4: normalizedPhone.slice(-4),
+    hasAccessToken: Boolean(notificationConfig.whatsappAccessToken),
+    hasPhoneNumberId: Boolean(notificationConfig.whatsappPhoneNumberId),
+  });
+
   if (!notificationConfig.whatsappAccessToken || !notificationConfig.whatsappPhoneNumberId) {
-    if (nodeEnv !== 'test') console.log(`[Notification] WhatsApp fallback to ${contact.phone}: ${message}`);
+    log(`WhatsApp fallback to ${contact.phone}: ${message}`);
     return { status: 'sent', provider: 'development-log' };
   }
 
@@ -51,20 +67,35 @@ const sendWhatsapp = async (contact, message) => {
       },
       body: JSON.stringify({
         messaging_product: 'whatsapp',
-        to: normalizeWhatsappNumber(contact.phone),
+        to: normalizedPhone,
         type: 'text',
         text: { preview_url: true, body: message },
       }),
     }
   );
 
-  if (!res.ok) throw new Error(`WhatsApp delivery failed with ${res.status}`);
+  const body = await res.text();
+  if (!res.ok) throw new Error(`WhatsApp delivery failed with ${res.status}: ${body}`);
+
+  log('WhatsApp send success', {
+    contactId: contact.id,
+    phoneLast4: normalizedPhone.slice(-4),
+    status: res.status,
+    providerResponse: body,
+  });
   return { status: 'sent', provider: 'whatsapp-cloud' };
 };
 
 const sendEmail = async (contact, subject, message) => {
+  log('Email send attempt', {
+    contactId: contact.id,
+    email: contact.email,
+    from: notificationConfig.emailFrom,
+    hasResendApiKey: Boolean(notificationConfig.resendApiKey),
+  });
+
   if (!notificationConfig.resendApiKey) {
-    if (nodeEnv !== 'test') console.log(`[Notification] Email fallback to ${contact.email}: ${subject}\n${message}`);
+    log(`Email fallback to ${contact.email}: ${subject}\n${message}`);
     return { status: 'sent', provider: 'development-log' };
   }
 
@@ -82,7 +113,15 @@ const sendEmail = async (contact, subject, message) => {
     }),
   });
 
-  if (!res.ok) throw new Error(`Email delivery failed with ${res.status}`);
+  const body = await res.text();
+  if (!res.ok) throw new Error(`Email delivery failed with ${res.status}: ${body}`);
+
+  log('Email send success', {
+    contactId: contact.id,
+    email: contact.email,
+    status: res.status,
+    providerResponse: body,
+  });
   return { status: 'sent', provider: 'resend' };
 };
 
@@ -95,9 +134,7 @@ const logNotification = async ({ alertId, contactId, channel, status }) => {
     sent_at: status === 'sent' ? new Date().toISOString() : null,
   });
 
-  if (error && nodeEnv !== 'test') {
-    console.error('[Notification] Failed to log notification:', error.message);
-  }
+  if (error) logError('Failed to log notification:', error.message);
 };
 
 const deliverToContact = async ({ alert, contact, subject, message }) => {
@@ -106,13 +143,26 @@ const deliverToContact = async ({ alert, contact, subject, message }) => {
   if (contact.phone) deliveries.push(['whatsapp', () => sendWhatsapp(contact, message)]);
   if (contact.email) deliveries.push(['email', () => sendEmail(contact, subject, message)]);
 
+  log('Delivering to contact', {
+    alertId: alert.id,
+    contactId: contact.id,
+    contactName: contact.full_name,
+    channels: deliveries.map(([channel]) => channel),
+    notificationEnabled: contact.notification_enabled !== false,
+  });
+
   await Promise.all(
     deliveries.map(async ([channel, send]) => {
       try {
         await send();
         await logNotification({ alertId: alert.id, contactId: contact.id, channel, status: 'sent' });
+        log('Delivery logged as sent', { alertId: alert.id, contactId: contact.id, channel });
       } catch (err) {
-        if (nodeEnv !== 'test') console.error(`[Notification] ${channel} failed:`, err.message);
+        logError(`${channel} failed:`, {
+          alertId: alert.id,
+          contactId: contact.id,
+          message: err.message,
+        });
         await logNotification({ alertId: alert.id, contactId: contact.id, channel, status: 'failed' });
       }
     })
@@ -121,7 +171,17 @@ const deliverToContact = async ({ alert, contact, subject, message }) => {
 
 const notifyContactsNow = async (alert, contacts, options = {}) => {
   const contactsToNotify = enabledContacts(contacts);
-  if (contactsToNotify.length === 0) return;
+  log('Notification batch starting', {
+    alertId: alert.id,
+    totalContacts: contacts.length,
+    enabledContacts: contactsToNotify.length,
+    frontendUrl,
+  });
+
+  if (contactsToNotify.length === 0) {
+    log('No enabled contacts with phone or email found for alert', { alertId: alert.id });
+    return;
+  }
 
   const subject = options.subject || 'Sentinel SOS emergency alert';
   const message = options.message || emergencyMessage(alert, contactsToNotify[0]);
@@ -142,6 +202,15 @@ const startRecurringEmergencyNotifications = async (alert, contacts, options = {
   const { sendImmediately = true } = options;
   stopRecurringEmergencyNotifications(alert.id);
 
+  log('Starting recurring notifications', {
+    alertId: alert.id,
+    contactCount: contacts.length,
+    sendImmediately,
+    repeatIntervalMs: notificationConfig.repeatIntervalMs,
+    hasWhatsappConfig: Boolean(notificationConfig.whatsappAccessToken && notificationConfig.whatsappPhoneNumberId),
+    hasEmailConfig: Boolean(notificationConfig.resendApiKey),
+  });
+
   if (sendImmediately) {
     await notifyContactsNow(alert, contacts, {
       subject: 'Sentinel SOS emergency alert',
@@ -151,8 +220,10 @@ const startRecurringEmergencyNotifications = async (alert, contacts, options = {
 
   const intervalId = setInterval(async () => {
     try {
+      log('Recurring notification tick', { alertId: alert.id });
       const latestAlert = await getActiveAlertForNotification(alert.id);
       if (!latestAlert) {
+        log('Alert no longer active. Stopping recurring notifications.', { alertId: alert.id });
         stopRecurringEmergencyNotifications(alert.id);
         return;
       }
@@ -165,7 +236,7 @@ const startRecurringEmergencyNotifications = async (alert, contacts, options = {
         messageFactory: (contact) => emergencyMessage(alertWithUser, contact),
       });
     } catch (err) {
-      if (nodeEnv !== 'test') console.error('[Notification] Recurring notification failed:', err.message);
+      logError('Recurring notification failed:', err.message);
     }
   }, notificationConfig.repeatIntervalMs);
 
@@ -175,14 +246,19 @@ const startRecurringEmergencyNotifications = async (alert, contacts, options = {
 
 const stopRecurringEmergencyNotifications = (alertId) => {
   const intervalId = activeNotificationJobs.get(alertId);
-  if (!intervalId) return;
+  if (!intervalId) {
+    log('No recurring notification job to stop', { alertId });
+    return;
+  }
 
   clearInterval(intervalId);
   activeNotificationJobs.delete(alertId);
+  log('Stopped recurring notification job', { alertId });
 };
 
 const notifyAlertClosed = async (alert, contacts, status) => {
   stopRecurringEmergencyNotifications(alert.id);
+  log('Sending alert closed notification', { alertId: alert.id, status, contactCount: contacts.length });
 
   await notifyContactsNow(alert, contacts, {
     subject: status === 'resolved' ? 'Sentinel update - user is safe' : 'Sentinel update - alert cancelled',

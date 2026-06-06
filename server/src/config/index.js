@@ -5,7 +5,14 @@ const parseInteger = (value, fallback) => {
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 const frontendUrl = process.env.FRONTEND_URL || 'https://sentinel-omega-ten.vercel.app';
-const allowedOrigins = frontendUrl.split(',').map((origin) => origin.trim()).filter(Boolean);
+const corsOrigins = process.env.CORS_ORIGINS || [
+  frontendUrl,
+  'https://sentinel-omega-ten.vercel.app',
+  'https://sentinel-mvp-nine.vercel.app',
+].join(',');
+const allowedOrigins = Array.from(
+  new Set(corsOrigins.split(',').map((origin) => origin.trim()).filter(Boolean))
+);
 
 if (nodeEnv === 'production' && !process.env.FRONTEND_URL) {
   throw new Error('FRONTEND_URL is required in production');
