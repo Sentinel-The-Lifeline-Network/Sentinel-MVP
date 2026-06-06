@@ -25,13 +25,27 @@ const getNotificationContacts = async (userId, userName) =>
 const notifyActiveAlert = async (alert, userId) => {
   const userName = await getUserName(userId);
   const contacts = await getNotificationContacts(userId, userName);
-  return startRecurringEmergencyNotifications({ ...alert, user_name: userName }, contacts);
+  return startRecurringEmergencyNotifications({ ...alert, user_name: userName }, contacts, {
+    waitForImmediate: false,
+  });
 };
+
+const queuedNotificationSummary = () => ({
+  status: 'queued',
+  contactCount: 0,
+  deliveryCount: 0,
+  sentCount: 0,
+  failedCount: 0,
+  channels: ['sms', 'email'],
+  failures: [],
+});
 
 const triggerSOS = async (userId, { latitude, longitude }) => {
   const existingActive = await getActiveAlert(userId);
   if (existingActive) {
-    await notifyActiveAlert(existingActive, userId);
+    notifyActiveAlert(existingActive, userId).catch((err) => {
+      console.error('[Notification] Failed to restart active alert notifications:', err.message);
+    });
     throw Object.assign(new Error('An active SOS alert already exists'), { statusCode: 409 });
   }
 
@@ -62,9 +76,11 @@ const triggerSOS = async (userId, { latitude, longitude }) => {
     });
   }
 
-  const notificationSummary = await notifyActiveAlert(alert, userId);
+  notifyActiveAlert(alert, userId).catch((err) => {
+    console.error('[Notification] Failed to start active alert notifications:', err.message);
+  });
 
-  return { ...alert, notification_summary: notificationSummary };
+  return { ...alert, notification_summary: queuedNotificationSummary() };
 };
 
 const getActiveAlert = async (userId) => {
@@ -93,9 +109,11 @@ const markSafe = async (alertId, userId) => {
 
   const userName = await getUserName(userId);
   const contacts = await getNotificationContacts(userId, userName);
-  const notificationSummary = await notifyAlertClosed({ ...previousAlert, ...data, user_name: userName }, contacts, 'resolved');
+  notifyAlertClosed({ ...previousAlert, ...data, user_name: userName }, contacts, 'resolved').catch((err) => {
+    console.error('[Notification] Failed to send safe notification:', err.message);
+  });
 
-  return { ...data, notification_summary: notificationSummary };
+  return { ...data, notification_summary: queuedNotificationSummary() };
 };
 
 const stopAlert = async (alertId, userId) => {
@@ -113,9 +131,11 @@ const stopAlert = async (alertId, userId) => {
 
   const userName = await getUserName(userId);
   const contacts = await getNotificationContacts(userId, userName);
-  const notificationSummary = await notifyAlertClosed({ ...previousAlert, ...data, user_name: userName }, contacts, 'cancelled');
+  notifyAlertClosed({ ...previousAlert, ...data, user_name: userName }, contacts, 'cancelled').catch((err) => {
+    console.error('[Notification] Failed to send cancelled notification:', err.message);
+  });
 
-  return { ...data, notification_summary: notificationSummary };
+  return { ...data, notification_summary: queuedNotificationSummary() };
 };
 
 const getAlertHistory = async (userId) => {

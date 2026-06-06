@@ -70,7 +70,8 @@ describe('SOS API', () => {
       expect(res.body.success).toBe(true);
       expect(startRecurringEmergencyNotifications).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'alert-1', user_name: 'Test User' }),
-        []
+        [],
+        { waitForImmediate: false }
       );
     });
 
@@ -91,7 +92,8 @@ describe('SOS API', () => {
       expect(res.status).toBe(409);
       expect(startRecurringEmergencyNotifications).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'existing-alert', user_name: expect.any(String) }),
-        []
+        [],
+        { waitForImmediate: false }
       );
     });
 

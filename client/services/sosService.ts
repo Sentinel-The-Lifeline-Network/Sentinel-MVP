@@ -13,7 +13,15 @@ export interface SOSAlert {
   tracking_token: string;
   created_at: string;
   sync_status?: 'synced' | 'pending';
+  alert_notifications?: Array<{
+    id: string;
+    contact_id: string;
+    channel: string;
+    status: 'sent' | 'failed' | string;
+    sent_at: string | null;
+  }>;
   notification_summary?: {
+    status?: 'queued' | 'completed';
     contactCount: number;
     deliveryCount: number;
     sentCount: number;

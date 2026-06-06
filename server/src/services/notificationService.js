@@ -275,7 +275,7 @@ const notifyContactsNow = async (alert, contacts, options = {}) => {
 };
 
 const startRecurringEmergencyNotifications = async (alert, contacts, options = {}) => {
-  const { sendImmediately = true } = options;
+  const { sendImmediately = true, waitForImmediate = true } = options;
   let immediateSummary = null;
   stopRecurringEmergencyNotifications(alert.id);
 
@@ -283,18 +283,28 @@ const startRecurringEmergencyNotifications = async (alert, contacts, options = {
     alertId: alert.id,
     contactCount: contacts.length,
     sendImmediately,
+    waitForImmediate,
     repeatIntervalMs: notificationConfig.repeatIntervalMs,
     hasSmsConfig: Boolean(notificationConfig.africasTalkingApiKey && notificationConfig.africasTalkingUsername),
     hasEmailConfig: Boolean(notificationConfig.gmailUser && notificationConfig.gmailAppPassword),
   });
 
-  if (sendImmediately) {
-    immediateSummary = await notifyContactsNow(alert, contacts, {
+  const sendImmediateNotifications = async () => {
+    const summary = await notifyContactsNow(alert, contacts, {
       subject: 'Sentinel SOS emergency alert',
       messageFactory: (contact) => emergencyMessage(alert, contact),
     });
 
-    options.onImmediateSummary?.(immediateSummary);
+    options.onImmediateSummary?.(summary);
+    return summary;
+  };
+
+  if (sendImmediately && waitForImmediate) {
+    immediateSummary = await sendImmediateNotifications();
+  } else if (sendImmediately) {
+    sendImmediateNotifications().catch((err) => {
+      logError('Immediate notification batch failed:', err.message);
+    });
   }
 
   const intervalId = setInterval(async () => {

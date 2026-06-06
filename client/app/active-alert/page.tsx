@@ -6,7 +6,7 @@ import EmergencyTimeline from '@/components/EmergencyTimeline';
 import LocationCard from '@/components/LocationCard';
 import PinConfirmModal from '@/components/PinConfirmModal';
 import { useSOS } from '@/hooks/useSOS';
-import { SOSAlert } from '@/services/sosService';
+import { sosService, SOSAlert } from '@/services/sosService';
 
 const formatElapsed = (totalSeconds: number) => {
   const safeSeconds = Math.max(0, totalSeconds);
@@ -17,6 +17,26 @@ const formatElapsed = (totalSeconds: number) => {
 };
 
 type NotificationSummary = NonNullable<SOSAlert['notification_summary']>;
+
+const summarizeNotificationRecords = (records: NonNullable<SOSAlert['alert_notifications']>): NotificationSummary => {
+  const failures = records
+    .filter((record) => record.status === 'failed')
+    .map((record) => ({
+      contactId: record.contact_id,
+      channel: record.channel,
+      message: `${record.channel.toUpperCase()} delivery failed. Check provider credentials and Render logs.`,
+    }));
+
+  return {
+    status: 'completed',
+    contactCount: new Set(records.map((record) => record.contact_id)).size,
+    deliveryCount: records.length,
+    sentCount: records.filter((record) => record.status === 'sent').length,
+    failedCount: failures.length,
+    channels: Array.from(new Set(records.map((record) => record.channel))),
+    failures,
+  };
+};
 
 export default function ActiveAlertPage() {
   const { state, alert, error, syncStatus, initialized, markSafe, stopAlert } = useSOS();
@@ -68,6 +88,35 @@ export default function ActiveAlertPage() {
       sessionStorage.removeItem('sentinel-notification-summary');
     }
   }, [alert?.id]);
+
+  useEffect(() => {
+    if (!alert?.id || state !== 'active') return;
+
+    let attempts = 0;
+    let cancelled = false;
+    const pollDeliveryStatus = async () => {
+      attempts += 1;
+      try {
+        const latest = await sosService.getById(alert.id);
+        const records = latest.alert_notifications || [];
+        if (records.length > 0 && !cancelled) {
+          setNotificationSummary(summarizeNotificationRecords(records));
+          setShowNotificationPopup(true);
+          return;
+        }
+      } catch {}
+
+      if (!cancelled && attempts < 8) {
+        window.setTimeout(pollDeliveryStatus, 2000);
+      }
+    };
+
+    const id = window.setTimeout(pollDeliveryStatus, 1500);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(id);
+    };
+  }, [alert?.id, state]);
 
   const timelineSteps = [
     { label: 'Alert triggered', time: alert?.started_at ? new Date(alert.started_at).toLocaleTimeString() : undefined, done: true },
@@ -134,10 +183,16 @@ export default function ActiveAlertPage() {
 
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-black text-white">
-                    {notificationSummary.failedCount > 0 ? 'Some notifications failed' : 'Notifications sent'}
+                    {notificationSummary.status === 'queued'
+                      ? 'Notifications sending'
+                      : notificationSummary.failedCount > 0
+                      ? 'Some notifications failed'
+                      : 'Notifications sent'}
                   </p>
                   <p className="text-xs text-muted mt-1 leading-relaxed">
-                    {notificationSummary.sentCount} sent, {notificationSummary.failedCount} failed across {notificationSummary.contactCount} contact(s).
+                    {notificationSummary.status === 'queued'
+                      ? 'SMS and email are being sent in the background. This screen will update shortly.'
+                      : `${notificationSummary.sentCount} sent, ${notificationSummary.failedCount} failed across ${notificationSummary.contactCount} contact(s).`}
                   </p>
                   {notificationSummary.failures.length > 0 && (
                     <div className="mt-2 space-y-1">

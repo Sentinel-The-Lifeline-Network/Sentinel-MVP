@@ -49,7 +49,7 @@ export const useGeolocation = () => {
           const cached = offlineSOSQueue.getLastKnownLocation();
           resolve(cached ? ({ ...cached, accuracy: null } as unknown as GeolocationCoordinates) : null);
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+        { enableHighAccuracy: true, timeout: 3000, maximumAge: 15000 }
       );
     });
   }, []);

@@ -13,6 +13,10 @@ const corsOrigins = process.env.CORS_ORIGINS || [
 const allowedOrigins = Array.from(
   new Set(corsOrigins.split(',').map((origin) => origin.trim()).filter(Boolean))
 );
+const configuredEmailFrom = process.env.EMAIL_FROM;
+const emailFrom = configuredEmailFrom?.includes('onboarding@resend.dev')
+  ? process.env.GMAIL_USER
+  : configuredEmailFrom || process.env.GMAIL_USER;
 
 if (nodeEnv === 'production' && !process.env.FRONTEND_URL) {
   throw new Error('FRONTEND_URL is required in production');
@@ -34,6 +38,6 @@ module.exports = {
     africasTalkingSenderId: process.env.AFRICAS_TALKING_SENDER_ID,
     gmailUser: process.env.GMAIL_USER,
     gmailAppPassword: process.env.GMAIL_APP_PASSWORD,
-    emailFrom: process.env.EMAIL_FROM || process.env.GMAIL_USER,
+    emailFrom,
   },
 };
