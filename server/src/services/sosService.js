@@ -25,7 +25,7 @@ const getNotificationContacts = async (userId, userName) =>
 const notifyActiveAlert = async (alert, userId) => {
   const userName = await getUserName(userId);
   const contacts = await getNotificationContacts(userId, userName);
-  await startRecurringEmergencyNotifications({ ...alert, user_name: userName }, contacts);
+  return startRecurringEmergencyNotifications({ ...alert, user_name: userName }, contacts);
 };
 
 const triggerSOS = async (userId, { latitude, longitude }) => {
@@ -62,9 +62,9 @@ const triggerSOS = async (userId, { latitude, longitude }) => {
     });
   }
 
-  await notifyActiveAlert(alert, userId);
+  const notificationSummary = await notifyActiveAlert(alert, userId);
 
-  return alert;
+  return { ...alert, notification_summary: notificationSummary };
 };
 
 const getActiveAlert = async (userId) => {
@@ -93,9 +93,9 @@ const markSafe = async (alertId, userId) => {
 
   const userName = await getUserName(userId);
   const contacts = await getNotificationContacts(userId, userName);
-  await notifyAlertClosed({ ...previousAlert, ...data, user_name: userName }, contacts, 'resolved');
+  const notificationSummary = await notifyAlertClosed({ ...previousAlert, ...data, user_name: userName }, contacts, 'resolved');
 
-  return data;
+  return { ...data, notification_summary: notificationSummary };
 };
 
 const stopAlert = async (alertId, userId) => {
@@ -113,9 +113,9 @@ const stopAlert = async (alertId, userId) => {
 
   const userName = await getUserName(userId);
   const contacts = await getNotificationContacts(userId, userName);
-  await notifyAlertClosed({ ...previousAlert, ...data, user_name: userName }, contacts, 'cancelled');
+  const notificationSummary = await notifyAlertClosed({ ...previousAlert, ...data, user_name: userName }, contacts, 'cancelled');
 
-  return data;
+  return { ...data, notification_summary: notificationSummary };
 };
 
 const getAlertHistory = async (userId) => {

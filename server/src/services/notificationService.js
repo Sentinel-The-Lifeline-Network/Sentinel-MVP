@@ -106,6 +106,15 @@ const sendSms = async (contact, message) => {
   const body = await res.text();
   if (!res.ok) throw new Error(`SMS delivery failed with ${res.status}: ${body}`);
 
+  const parsedBody = JSON.parse(body || '{}');
+  const recipients = parsedBody?.SMSMessageData?.Recipients;
+  if (Array.isArray(recipients) && recipients.length > 0) {
+    const failedRecipients = recipients.filter((recipient) => !/success|sent/i.test(String(recipient.status || '')));
+    if (failedRecipients.length > 0) {
+      throw new Error(`SMS provider accepted request but recipient delivery failed: ${JSON.stringify(failedRecipients)}`);
+    }
+  }
+
   log('SMS send success', {
     contactId: contact.id,
     phoneLast4: normalizedPhone.slice(-4),
@@ -173,6 +182,22 @@ const logNotification = async ({ alertId, contactId, channel, status }) => {
   if (error) logError('Failed to log notification:', error.message);
 };
 
+const summarizeDeliveryResults = (contacts, results) => ({
+  contactCount: contacts.length,
+  deliveryCount: results.length,
+  sentCount: results.filter((result) => result.status === 'sent').length,
+  failedCount: results.filter((result) => result.status === 'failed').length,
+  channels: Array.from(new Set(results.map((result) => result.channel))),
+  failures: results
+    .filter((result) => result.status === 'failed')
+    .map((result) => ({
+      contactId: result.contactId,
+      contactName: result.contactName,
+      channel: result.channel,
+      message: result.message,
+    })),
+});
+
 const deliverToContact = async ({ alert, contact, subject, message }) => {
   const deliveries = [];
 
@@ -187,12 +212,18 @@ const deliverToContact = async ({ alert, contact, subject, message }) => {
     notificationEnabled: contact.notification_enabled !== false,
   });
 
-  await Promise.all(
+  return Promise.all(
     deliveries.map(async ([channel, send]) => {
       try {
         await send();
         await logNotification({ alertId: alert.id, contactId: contact.id, channel, status: 'sent' });
         log('Delivery logged as sent', { alertId: alert.id, contactId: contact.id, channel });
+        return {
+          contactId: contact.id,
+          contactName: contact.full_name,
+          channel,
+          status: 'sent',
+        };
       } catch (err) {
         logError(`${channel} failed:`, {
           alertId: alert.id,
@@ -200,6 +231,13 @@ const deliverToContact = async ({ alert, contact, subject, message }) => {
           message: err.message,
         });
         await logNotification({ alertId: alert.id, contactId: contact.id, channel, status: 'failed' });
+        return {
+          contactId: contact.id,
+          contactName: contact.full_name,
+          channel,
+          status: 'failed',
+          message: err.message,
+        };
       }
     })
   );
@@ -216,13 +254,13 @@ const notifyContactsNow = async (alert, contacts, options = {}) => {
 
   if (contactsToNotify.length === 0) {
     log('No enabled contacts with phone or email found for alert', { alertId: alert.id });
-    return;
+    return summarizeDeliveryResults([], []);
   }
 
   const subject = options.subject || 'Sentinel SOS emergency alert';
   const message = options.message || emergencyMessage(alert, contactsToNotify[0]);
 
-  await Promise.all(
+  const results = await Promise.all(
     contactsToNotify.map((contact) =>
       deliverToContact({
         alert,
@@ -232,10 +270,13 @@ const notifyContactsNow = async (alert, contacts, options = {}) => {
       })
     )
   );
+
+  return summarizeDeliveryResults(contactsToNotify, results.flat());
 };
 
 const startRecurringEmergencyNotifications = async (alert, contacts, options = {}) => {
   const { sendImmediately = true } = options;
+  let immediateSummary = null;
   stopRecurringEmergencyNotifications(alert.id);
 
   log('Starting recurring notifications', {
@@ -248,10 +289,12 @@ const startRecurringEmergencyNotifications = async (alert, contacts, options = {
   });
 
   if (sendImmediately) {
-    await notifyContactsNow(alert, contacts, {
+    immediateSummary = await notifyContactsNow(alert, contacts, {
       subject: 'Sentinel SOS emergency alert',
       messageFactory: (contact) => emergencyMessage(alert, contact),
     });
+
+    options.onImmediateSummary?.(immediateSummary);
   }
 
   const intervalId = setInterval(async () => {
@@ -278,6 +321,7 @@ const startRecurringEmergencyNotifications = async (alert, contacts, options = {
 
   if (typeof intervalId.unref === 'function') intervalId.unref();
   activeNotificationJobs.set(alert.id, intervalId);
+  return immediateSummary;
 };
 
 const stopRecurringEmergencyNotifications = (alertId) => {
@@ -296,7 +340,7 @@ const notifyAlertClosed = async (alert, contacts, status) => {
   stopRecurringEmergencyNotifications(alert.id);
   log('Sending alert closed notification', { alertId: alert.id, status, contactCount: contacts.length });
 
-  await notifyContactsNow(alert, contacts, {
+  return notifyContactsNow(alert, contacts, {
     subject: status === 'resolved' ? 'Sentinel update - user is safe' : 'Sentinel update - alert cancelled',
     message: finalMessage(alert, status),
   });

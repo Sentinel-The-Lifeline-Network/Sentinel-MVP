@@ -15,6 +15,21 @@ jest.mock('@/hooks/useSOS', () => ({
       last_latitude: 6.5244,
       last_longitude: 3.3792,
       last_location_timestamp: new Date().toISOString(),
+      notification_summary: {
+        contactCount: 2,
+        deliveryCount: 4,
+        sentCount: 3,
+        failedCount: 1,
+        channels: ['sms', 'email'],
+        failures: [
+          {
+            contactId: 'contact-1',
+            contactName: 'Jane Doe',
+            channel: 'sms',
+            message: 'SMS delivery failed',
+          },
+        ],
+      },
     },
     error: null,
     markSafe: jest.fn(),
@@ -72,6 +87,12 @@ describe('ActiveAlertPage', () => {
   it('renders emergency timeline', () => {
     render(<ActiveAlertPage />);
     expect(screen.getByTestId('timeline')).toBeInTheDocument();
+  });
+
+  it('renders notification delivery popup when summary is available', () => {
+    render(<ActiveAlertPage />);
+    expect(screen.getByText(/Some notifications failed/i)).toBeInTheDocument();
+    expect(screen.getByText(/3 sent, 1 failed/i)).toBeInTheDocument();
   });
 
   it('renders share tracking link button', () => {

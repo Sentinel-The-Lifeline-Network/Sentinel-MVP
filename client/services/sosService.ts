@@ -13,6 +13,19 @@ export interface SOSAlert {
   tracking_token: string;
   created_at: string;
   sync_status?: 'synced' | 'pending';
+  notification_summary?: {
+    contactCount: number;
+    deliveryCount: number;
+    sentCount: number;
+    failedCount: number;
+    channels: string[];
+    failures: Array<{
+      contactId: string;
+      contactName?: string;
+      channel: string;
+      message: string;
+    }>;
+  } | null;
 }
 
 export const sosService = {

@@ -13,6 +13,11 @@ type ServiceWorkerWithSync = ServiceWorkerRegistration & {
   sync?: { register: (tag: string) => Promise<void> };
 };
 
+const storeNotificationSummary = (alert: SOSAlert) => {
+  if (typeof window === 'undefined' || !alert.notification_summary) return;
+  sessionStorage.setItem('sentinel-notification-summary', JSON.stringify(alert.notification_summary));
+};
+
 export const useSOS = () => {
   const [state, setState] = useState<SOSState>('idle');
   const [alert, setAlert] = useState<SOSAlert | null>(null);
@@ -104,6 +109,15 @@ export const useSOS = () => {
       const coords = await getCurrentPosition();
       const payload = coords ? { latitude: coords.latitude, longitude: coords.longitude } : undefined;
       const newAlert = await sosService.trigger(payload);
+      storeNotificationSummary(newAlert);
+      if (newAlert.notification_summary) {
+        const { sentCount, failedCount } = newAlert.notification_summary;
+        setSyncStatus(
+          failedCount > 0
+            ? `${sentCount} notification(s) sent, ${failedCount} failed.`
+            : `${sentCount} notification(s) sent successfully.`
+        );
+      }
       setAlert(newAlert);
       setState('active');
       router.push('/active-alert');
@@ -155,6 +169,7 @@ export const useSOS = () => {
           return;
         }
         const updated = await sosService.markSafe(alert.id, pin);
+        storeNotificationSummary(updated);
         setAlert(updated);
         setState('idle');
         router.push('/');
@@ -180,6 +195,7 @@ export const useSOS = () => {
           return;
         }
         const updated = await sosService.stopAlert(alert.id, pin);
+        storeNotificationSummary(updated);
         setAlert(updated);
         setState('idle');
         router.push('/');

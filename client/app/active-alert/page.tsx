@@ -6,6 +6,7 @@ import EmergencyTimeline from '@/components/EmergencyTimeline';
 import LocationCard from '@/components/LocationCard';
 import PinConfirmModal from '@/components/PinConfirmModal';
 import { useSOS } from '@/hooks/useSOS';
+import { SOSAlert } from '@/services/sosService';
 
 const formatElapsed = (totalSeconds: number) => {
   const safeSeconds = Math.max(0, totalSeconds);
@@ -15,10 +16,14 @@ const formatElapsed = (totalSeconds: number) => {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
+type NotificationSummary = NonNullable<SOSAlert['notification_summary']>;
+
 export default function ActiveAlertPage() {
   const { state, alert, error, syncStatus, initialized, markSafe, stopAlert } = useSOS();
   const router = useRouter();
   const [elapsed, setElapsed] = useState('00:00');
+  const [notificationSummary, setNotificationSummary] = useState<NotificationSummary | null>(null);
+  const [showNotificationPopup, setShowNotificationPopup] = useState(false);
   const [showMarkSafeModal, setShowMarkSafeModal] = useState(false);
   const [showStopModal, setShowStopModal] = useState(false);
   const [stopping, setStopping] = useState(false);
@@ -42,6 +47,27 @@ export default function ActiveAlertPage() {
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [alert?.id, state]);
+
+  useEffect(() => {
+    const summary = alert?.notification_summary;
+    if (summary) {
+      setNotificationSummary(summary);
+      setShowNotificationPopup(true);
+      return;
+    }
+
+    const storedSummary = sessionStorage.getItem('sentinel-notification-summary');
+    if (!storedSummary) return;
+
+    try {
+      const parsed = JSON.parse(storedSummary) as NotificationSummary;
+      setNotificationSummary(parsed);
+      setShowNotificationPopup(true);
+      sessionStorage.removeItem('sentinel-notification-summary');
+    } catch {
+      sessionStorage.removeItem('sentinel-notification-summary');
+    }
+  }, [alert?.id]);
 
   const timelineSteps = [
     { label: 'Alert triggered', time: alert?.started_at ? new Date(alert.started_at).toLocaleTimeString() : undefined, done: true },
@@ -73,6 +99,71 @@ export default function ActiveAlertPage() {
 
   return (
     <div className="min-h-dvh flex flex-col emergency-mesh-bg">
+      <AnimatePresence>
+        {showNotificationPopup && notificationSummary && (
+          <motion.div
+            className="fixed inset-x-4 top-5 z-50 mx-auto max-w-md"
+            initial={{ opacity: 0, y: -16, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -12, scale: 0.96 }}
+            role="status"
+            aria-live="assertive"
+          >
+            <div
+              className="glass-card rounded-2xl p-4"
+              style={{
+                border: notificationSummary.failedCount > 0
+                  ? '1px solid rgba(248,113,113,0.35)'
+                  : '1px solid rgba(16,185,129,0.35)',
+                boxShadow: notificationSummary.failedCount > 0
+                  ? '0 16px 50px rgba(127,29,29,0.35)'
+                  : '0 16px 50px rgba(6,95,70,0.26)',
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: notificationSummary.failedCount > 0 ? 'rgba(248,113,113,0.12)' : 'rgba(16,185,129,0.12)' }}
+                >
+                  {notificationSummary.failedCount > 0 ? (
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F87171" strokeWidth="2.4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  ) : (
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.6"><polyline points="20 6 9 17 4 12"/></svg>
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-black text-white">
+                    {notificationSummary.failedCount > 0 ? 'Some notifications failed' : 'Notifications sent'}
+                  </p>
+                  <p className="text-xs text-muted mt-1 leading-relaxed">
+                    {notificationSummary.sentCount} sent, {notificationSummary.failedCount} failed across {notificationSummary.contactCount} contact(s).
+                  </p>
+                  {notificationSummary.failures.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {notificationSummary.failures.slice(0, 3).map((failure) => (
+                        <p key={`${failure.contactId}-${failure.channel}`} className="text-[11px] leading-relaxed" style={{ color: '#FCA5A5' }}>
+                          {failure.channel.toUpperCase()} failed for {failure.contactName || 'contact'}: {failure.message}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => setShowNotificationPopup(false)}
+                  className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: '#94A3B8' }}
+                  aria-label="Close notification status"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div
         className="sticky top-0 z-20 px-4 lg:px-8 pt-12 pb-4"
         style={{ background: 'rgba(2,6,23,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(239,68,68,0.12)' }}
