@@ -1,4 +1,4 @@
-export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://sentinel.app';
+export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://sentinel-omega-ten.vercel.app';
 
 export const SEO = {
   title: 'Sentinel - Fast Emergency Response & Safety Network',

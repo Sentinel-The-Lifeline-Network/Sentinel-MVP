@@ -4,7 +4,7 @@ const parseInteger = (value, fallback) => {
 };
 
 const nodeEnv = process.env.NODE_ENV || 'development';
-const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+const frontendUrl = process.env.FRONTEND_URL || 'https://sentinel-omega-ten.vercel.app';
 const allowedOrigins = frontendUrl.split(',').map((origin) => origin.trim()).filter(Boolean);
 
 if (nodeEnv === 'production' && !process.env.FRONTEND_URL) {
@@ -25,6 +25,6 @@ module.exports = {
     whatsappAccessToken: process.env.WHATSAPP_ACCESS_TOKEN,
     whatsappPhoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID,
     resendApiKey: process.env.RESEND_API_KEY,
-    emailFrom: process.env.EMAIL_FROM || 'Sentinel <alerts@sentinel.app>',
+    emailFrom: process.env.EMAIL_FROM || 'Sentinel <onboarding@resend.dev>',
   },
 };
