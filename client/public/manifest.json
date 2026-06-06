@@ -1,0 +1,23 @@
+{
+  "name": "Sentinel - Fast Emergency Response & Safety Network",
+  "short_name": "Sentinel",
+  "description": "Sentinel helps users send instant SOS alerts, share live location, notify trusted contacts, and connect with responders during emergencies.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "id": "/",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["utilities", "health", "security"],
+  "prefer_related_applications": false
+}
