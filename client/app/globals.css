@@ -42,15 +42,26 @@ body {
 input,
 textarea,
 select {
+  appearance: none;
+  -webkit-appearance: none;
   color-scheme: light;
-  background-color: #F7F4EE;
-  color: #151515;
-  border-color: #E7E0D7;
+  background-color: #F7F4EE !important;
+  color: #151515 !important;
+  border-color: #E7E0D7 !important;
+  -webkit-text-fill-color: #151515;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  background-color: #FFFFFF !important;
+  border-color: #0B3D2E !important;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #6B6B6B;
+  color: #6B6B6B !important;
+  -webkit-text-fill-color: #6B6B6B;
   opacity: 0.72;
 }
 

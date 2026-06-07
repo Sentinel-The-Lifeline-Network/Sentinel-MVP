@@ -24,8 +24,10 @@ export default function ResponderPage() {
       const data = await api.get<ActiveAlert[]>('/api/responder/alerts');
       setAlerts(data);
       setLastRefresh(new Date());
-    } catch {}
-    finally { setLoading(false); }
+    } catch {
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -34,54 +36,63 @@ export default function ResponderPage() {
     return () => clearInterval(interval);
   }, []);
 
+  const activeCount = alerts.filter((alert) => alert.status === 'active').length;
+
   return (
-    <div
-      className="min-h-dvh flex flex-col"
-      style={{ background: '#F7F4EE' }}
-    >
-      {/* Header — SOC style */}
-      <div
-        className="px-6 pt-12 pb-4"
-        style={{
-          background: '#FFFFFF',
-          borderBottom: '1px solid #E7E0D7',
-        }}
-      >
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-2 h-2 rounded-full bg-accent-teal animate-pulse" />
-          <span className="text-xs font-bold tracking-widest text-accent-teal uppercase">
-            Operations Center
-          </span>
-        </div>
-        <h1 className="text-2xl font-black" style={{ color: '#151515' }}>Sentinel Responder</h1>
-        <p className="text-muted text-xs mt-1">
-          Last updated: {lastRefresh.toLocaleTimeString()}
-        </p>
-      </div>
-
-      {/* Stats bar */}
-      <div className="px-6 py-4 grid grid-cols-3 gap-3">
-        {[
-          { label: 'Active', value: alerts.filter((a) => a.status === 'active').length, color: '#C53A2D' },
-          { label: 'Total', value: alerts.length, color: '#6B6B6B' },
-          { label: 'Status', value: 'LIVE', color: '#0B3D2E' },
-        ].map((stat) => (
-          <div key={stat.label} className="glass-card rounded-xl p-3 text-center">
-            <p className="text-xs text-muted">{stat.label}</p>
-            <p className="text-lg font-black mt-0.5" style={{ color: stat.color }}>{stat.value}</p>
+    <div className="min-h-dvh flex flex-col" style={{ background: '#F7F4EE' }}>
+      <header className="px-5 pt-12 pb-5" style={{ borderBottom: '1px solid #E7E0D7' }}>
+        <div className="mx-auto max-w-3xl">
+          <div
+            className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-3"
+            style={{ background: '#FFFFFF', border: '1px solid #E7E0D7' }}
+          >
+            <span className="w-2 h-2 rounded-full" style={{ background: '#1F5A47' }} />
+            <span className="text-[10px] font-bold tracking-[0.16em] uppercase" style={{ color: '#0B3D2E' }}>
+              Response Desk
+            </span>
           </div>
-        ))}
-      </div>
+          <h1 className="text-2xl font-black" style={{ color: '#151515' }}>Sentinel Responder</h1>
+          <p className="text-muted text-xs mt-1">
+            Last updated: {lastRefresh.toLocaleTimeString()}
+          </p>
+        </div>
+      </header>
 
-      {/* Alert list */}
-      <div className="flex-1 px-6 pb-10 space-y-3">
+      <section className="px-5 py-4">
+        <div className="mx-auto max-w-3xl grid grid-cols-3 gap-3">
+          {[
+            { label: 'Active', value: activeCount, color: '#C53A2D', surface: '#EDE0DD' },
+            { label: 'Total', value: alerts.length, color: '#151515', surface: '#FFFFFF' },
+            { label: 'Status', value: 'Live', color: '#0B3D2E', surface: '#FFFFFF' },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="rounded-2xl p-3 text-center"
+              style={{ background: stat.surface, border: '1px solid #E7E0D7' }}
+            >
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: '#6B6B6B' }}>{stat.label}</p>
+              <p className="text-lg font-black mt-0.5" style={{ color: stat.color }}>{stat.value}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <main className="flex-1 px-5 pb-10 space-y-3 mx-auto w-full max-w-3xl">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-sm font-bold tracking-wide" style={{ color: '#151515' }}>Active Alerts</h2>
+          <div>
+            <h2 className="text-sm font-bold tracking-wide" style={{ color: '#151515' }}>Active Alerts</h2>
+            <p className="text-xs mt-0.5" style={{ color: '#6B6B6B' }}>Incidents that need attention appear here.</p>
+          </div>
           <button
             onClick={load}
-            className="text-xs text-muted flex items-center gap-1 active:opacity-60"
+            className="text-xs font-bold flex items-center gap-1 active:opacity-60 rounded-full px-3 py-2"
+            style={{ background: '#FFFFFF', color: '#0B3D2E', border: '1px solid #E7E0D7' }}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+            </svg>
             Refresh
           </button>
         </div>
@@ -91,11 +102,7 @@ export default function ResponderPage() {
             <div className="w-8 h-8 rounded-full border-2 border-accent-teal border-t-transparent animate-spin" />
           </div>
         ) : alerts.length === 0 ? (
-          <motion.div
-            className="text-center pt-12"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
+          <motion.div className="text-center pt-12" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <div
               className="w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-4"
               style={{ background: '#FFFFFF', border: '1px solid #E7E0D7' }}
@@ -108,17 +115,21 @@ export default function ResponderPage() {
             <p className="text-muted text-sm mt-1">No active emergencies at this time</p>
           </motion.div>
         ) : (
-          alerts.map((alert, i) => (
+          alerts.map((alert, index) => (
             <motion.div
               key={alert.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
+              transition={{ delay: index * 0.06 }}
             >
               <Link
                 href={`/responder/alerts/${alert.id}`}
-                className="block glass-card rounded-2xl p-4 transition-all active:scale-[0.98]"
-                style={{ borderLeft: alert.status === 'active' ? '3px solid #C53A2D' : '3px solid transparent' }}
+                className="block rounded-2xl p-4 transition-all active:scale-[0.98]"
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #E7E0D7',
+                  borderLeft: alert.status === 'active' ? '4px solid #C53A2D' : '1px solid #E7E0D7',
+                }}
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
@@ -148,7 +159,7 @@ export default function ResponderPage() {
             </motion.div>
           ))
         )}
-      </div>
+      </main>
     </div>
   );
 }
