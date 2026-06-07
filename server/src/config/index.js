@@ -3,8 +3,13 @@ const parseInteger = (value, fallback) => {
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+const cleanEnv = (value) => {
+  const cleaned = value?.trim();
+  return cleaned || undefined;
+};
+
 const nodeEnv = process.env.NODE_ENV || 'development';
-const frontendUrl = process.env.FRONTEND_URL || 'https://sentinel-omega-ten.vercel.app';
+const frontendUrl = cleanEnv(process.env.FRONTEND_URL) || 'https://sentinel-omega-ten.vercel.app';
 const corsOrigins = process.env.CORS_ORIGINS || [
   frontendUrl,
   'https://sentinel-omega-ten.vercel.app',
@@ -13,10 +18,10 @@ const corsOrigins = process.env.CORS_ORIGINS || [
 const allowedOrigins = Array.from(
   new Set(corsOrigins.split(',').map((origin) => origin.trim()).filter(Boolean))
 );
-const configuredEmailFrom = process.env.EMAIL_FROM;
+const configuredEmailFrom = cleanEnv(process.env.EMAIL_FROM);
 const emailFrom = configuredEmailFrom?.includes('onboarding@resend.dev')
-  ? process.env.GMAIL_USER
-  : configuredEmailFrom || process.env.GMAIL_USER;
+  ? cleanEnv(process.env.GMAIL_USER)
+  : configuredEmailFrom || cleanEnv(process.env.GMAIL_USER);
 
 if (nodeEnv === 'production' && !process.env.FRONTEND_URL) {
   throw new Error('FRONTEND_URL is required in production');
@@ -33,11 +38,11 @@ module.exports = {
   },
   notifications: {
     repeatIntervalMs: parseInteger(process.env.NOTIFICATION_REPEAT_INTERVAL_MS, 5 * 60 * 1000),
-    africasTalkingApiKey: process.env.AFRICAS_TALKING_API_KEY,
-    africasTalkingUsername: process.env.AFRICAS_TALKING_USERNAME || 'sandbox',
-    africasTalkingSenderId: process.env.AFRICAS_TALKING_SENDER_ID,
-    gmailUser: process.env.GMAIL_USER,
-    gmailAppPassword: process.env.GMAIL_APP_PASSWORD,
+    africasTalkingApiKey: cleanEnv(process.env.AFRICAS_TALKING_API_KEY),
+    africasTalkingUsername: cleanEnv(process.env.AFRICAS_TALKING_USERNAME) || 'sandbox',
+    africasTalkingSenderId: cleanEnv(process.env.AFRICAS_TALKING_SENDER_ID),
+    gmailUser: cleanEnv(process.env.GMAIL_USER),
+    gmailAppPassword: cleanEnv(process.env.GMAIL_APP_PASSWORD),
     emailFrom,
   },
 };
