@@ -132,8 +132,8 @@ describe('notificationService', () => {
     expect(_private.normalizePhoneNumber('002348011111111')).toBe('2348011111111');
   });
 
-  it('sends Africa\'s Talking SMS with bearer authorization and form body', async () => {
-    config.notifications.africasTalkingApiKey = 'test-api-key';
+  it('sends Africa\'s Talking SMS with apiKey authorization and form body', async () => {
+    config.notifications.africasTalkingApiKey = ' test-api-key ';
     config.notifications.africasTalkingUsername = 'sandbox';
     config.notifications.africasTalkingSenderId = 'Sentinel';
     global.fetch = jest.fn().mockResolvedValue({
@@ -153,8 +153,9 @@ describe('notificationService', () => {
       expect.objectContaining({
         method: 'POST',
         headers: {
-          Authorization: 'Bearer test-api-key',
+          apiKey: 'test-api-key',
           'Content-Type': 'application/x-www-form-urlencoded',
+          Accept: 'application/json',
         },
       })
     );

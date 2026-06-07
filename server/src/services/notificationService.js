@@ -107,8 +107,9 @@ const sendSms = async (contact, message) => {
   const res = await fetch('https://api.africastalking.com/version1/messaging', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${cleanApiKey}`,
+      apiKey: cleanApiKey,
       'Content-Type': 'application/x-www-form-urlencoded',
+      Accept: 'application/json',
     },
     body: payload.toString(),
   });
