@@ -23,6 +23,7 @@ jest.mock('nodemailer', () => ({
 }));
 
 const supabase = require('../src/config/supabase');
+const config = require('../src/config');
 const {
   startRecurringEmergencyNotifications,
   stopRecurringEmergencyNotifications,
@@ -101,6 +102,10 @@ describe('notificationService', () => {
     delete process.env.AFRICAS_TALKING_USERNAME;
     delete process.env.GMAIL_USER;
     delete process.env.GMAIL_APP_PASSWORD;
+    delete global.fetch;
+    config.notifications.africasTalkingApiKey = undefined;
+    config.notifications.africasTalkingUsername = 'sandbox';
+    config.notifications.africasTalkingSenderId = undefined;
   });
 
   afterEach(() => {
@@ -125,6 +130,40 @@ describe('notificationService', () => {
     expect(_private.normalizePhoneNumber('08011111111')).toBe('2348011111111');
     expect(_private.normalizePhoneNumber('8011111111')).toBe('2348011111111');
     expect(_private.normalizePhoneNumber('002348011111111')).toBe('2348011111111');
+  });
+
+  it('sends Africa\'s Talking SMS with bearer authorization and form body', async () => {
+    config.notifications.africasTalkingApiKey = 'test-api-key';
+    config.notifications.africasTalkingUsername = 'sandbox';
+    config.notifications.africasTalkingSenderId = 'Sentinel';
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: jest.fn().mockResolvedValue(JSON.stringify({
+        SMSMessageData: {
+          Recipients: [{ status: 'Success', number: '+2348011111111' }],
+        },
+      })),
+    });
+
+    await _private.sendSms({ id: 'contact-sms', phone: '08011111111' }, 'Help is needed');
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      'https://api.africastalking.com/version1/messaging',
+      expect.objectContaining({
+        method: 'POST',
+        headers: {
+          Authorization: 'Bearer test-api-key',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
+    );
+
+    const requestBody = global.fetch.mock.calls[0][1].body;
+    expect(requestBody).toContain('username=sandbox');
+    expect(requestBody).toContain('to=%2B2348011111111');
+    expect(requestBody).toContain('message=Help+is+needed');
+    expect(requestBody).toContain('from=Sentinel');
   });
 
   it('targets every enabled contact that has a phone or email', () => {
