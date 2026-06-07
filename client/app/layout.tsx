@@ -1,14 +1,21 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { IBM_Plex_Sans, Manrope } from 'next/font/google';
 import './globals.css';
 import AppShell from '@/components/AppShell';
 import { AuthProvider } from '@/lib/authContext';
 import { SEO, SITE_URL } from '@/constants/seo';
 
-const inter = Inter({
+const manrope = Manrope({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-heading',
+});
+
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-body',
+  weight: ['400', '500', '600', '700'],
 });
 
 export const metadata: Metadata = {
@@ -60,13 +67,13 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#020617',
+  themeColor: '#F7F4EE',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} antialiased`}>
+      <body className={`${manrope.variable} ${ibmPlexSans.variable} antialiased`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

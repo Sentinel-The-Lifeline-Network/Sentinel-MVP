@@ -29,9 +29,9 @@ describe('SOSButton', () => {
     expect(screen.getByRole('button')).toBeDisabled();
   });
 
-  it('shows ACTIVATING text while activating', () => {
+  it('shows sending text while activating', () => {
     render(<SOSButton state="activating" onPress={jest.fn()} />);
-    expect(screen.getByText('ACTIVATING...')).toBeInTheDocument();
+    expect(screen.getByText('SENDING')).toBeInTheDocument();
   });
 
   it('shows ACTIVE text when active', () => {

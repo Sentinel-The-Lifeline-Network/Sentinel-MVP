@@ -27,7 +27,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center" style={{ background: '#020617' }}>
+      <div className="min-h-dvh flex items-center justify-center" style={{ background: '#F7F4EE' }}>
         <motion.div
           className="flex flex-col items-center gap-4"
           initial={{ opacity: 0 }}
@@ -35,7 +35,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
         >
           <div
             className="w-12 h-12 rounded-2xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #DC2626, #991B1B)', boxShadow: '0 0 30px rgba(220,38,38,0.4)' }}
+            style={{ background: '#0B3D2E' }}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
@@ -44,7 +44,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               <motion.div
                 key={i}
                 className="w-1.5 h-1.5 rounded-full"
-                style={{ background: '#EF4444' }}
+                style={{ background: '#0B3D2E' }}
                 animate={{ opacity: [0.3, 1, 0.3] }}
                 transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
               />
@@ -56,7 +56,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-dvh" style={{ background: '#020617' }}>
+    <div className="flex min-h-dvh" style={{ background: '#F7F4EE' }}>
       {/* Desktop sidebar */}
       <Sidebar />
 

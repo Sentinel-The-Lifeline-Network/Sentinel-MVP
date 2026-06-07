@@ -33,7 +33,7 @@ export default function AlertHistoryCard({ alert, index }: AlertHistoryCardProps
       >
         <div className="flex items-start justify-between mb-2">
           <div>
-            <p className="text-sm font-semibold text-white">
+            <p className="text-sm font-semibold" style={{ color: '#151515' }}>
               {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </p>
             <p className="text-xs text-muted mt-0.5">
@@ -43,17 +43,17 @@ export default function AlertHistoryCard({ alert, index }: AlertHistoryCardProps
           <StatusBadge status={alert.status} />
         </div>
 
-        <div className="flex items-center gap-4 mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="flex items-center gap-4 mt-3 pt-3" style={{ borderTop: '1px solid #E7E0D7' }}>
           <div>
             <p className="text-[10px] text-muted tracking-wide uppercase">Duration</p>
-            <p className="text-sm font-medium text-white mt-0.5">
+            <p className="text-sm font-medium mt-0.5" style={{ color: '#151515' }}>
               {formatDuration(alert.started_at, alert.ended_at)}
             </p>
           </div>
           {hasLocation && (
             <div>
               <p className="text-[10px] text-muted tracking-wide uppercase">Location</p>
-              <p className="text-sm font-mono text-white mt-0.5">
+              <p className="text-sm font-mono mt-0.5" style={{ color: '#151515' }}>
                 {alert.last_latitude?.toFixed(4)}, {alert.last_longitude?.toFixed(4)}
               </p>
             </div>

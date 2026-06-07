@@ -1,14 +1,16 @@
 <svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1200" height="630" fill="#020617"/>
-  <circle cx="910" cy="110" r="260" fill="#0F4C81" opacity="0.22"/>
-  <circle cx="210" cy="560" r="300" fill="#00C2A8" opacity="0.12"/>
-  <circle cx="600" cy="315" r="150" fill="#EF4444" opacity="0.12"/>
-  <rect x="88" y="86" width="1024" height="458" rx="32" fill="#0F172A" opacity="0.74" stroke="white" stroke-opacity="0.08"/>
-  <circle cx="210" cy="220" r="62" fill="#EF4444"/>
-  <path d="M210 118l72 29v76c0 70-72 110-72 110s-72-40-72-110v-76l72-29z" stroke="white" stroke-width="20" stroke-linejoin="round"/>
-  <text x="320" y="230" fill="white" font-family="Inter, Arial, sans-serif" font-size="78" font-weight="900">Sentinel</text>
-  <text x="322" y="298" fill="#94A3B8" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="700">Fast Emergency Response &amp; Safety Network</text>
-  <text x="322" y="380" fill="#E2E8F0" font-family="Inter, Arial, sans-serif" font-size="29" font-weight="500">Instant SOS alerts. Live location sharing. Trusted contact notifications.</text>
-  <rect x="322" y="424" width="234" height="56" rx="28" fill="#EF4444"/>
-  <text x="356" y="461" fill="white" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="800">One-tap SOS</text>
+  <rect width="1200" height="630" fill="#F7F4EE"/>
+  <rect x="92" y="78" width="1016" height="474" rx="28" fill="#FFFFFF" stroke="#E7E0D7" stroke-width="2"/>
+  <circle cx="206" cy="210" r="62" fill="#C53A2D"/>
+  <path d="M206 116l72 29v76c0 70-72 110-72 110s-72-40-72-110v-76l72-29z" stroke="#FFFFFF" stroke-width="20" stroke-linejoin="round"/>
+  <text x="320" y="220" fill="#151515" font-family="Manrope, Arial, sans-serif" font-size="78" font-weight="900">Sentinel</text>
+  <text x="322" y="292" fill="#6B6B6B" font-family="IBM Plex Sans, Arial, sans-serif" font-size="34" font-weight="700">Emergency response for real people</text>
+  <text x="322" y="374" fill="#151515" font-family="IBM Plex Sans, Arial, sans-serif" font-size="29" font-weight="500">One-tap SOS alerts, live location, and trusted contacts.</text>
+  <rect x="322" y="424" width="234" height="56" rx="18" fill="#C53A2D"/>
+  <text x="356" y="461" fill="#FFFFFF" font-family="Manrope, Arial, sans-serif" font-size="22" font-weight="800">One-tap SOS</text>
+  <rect x="782" y="166" width="238" height="304" rx="30" fill="#F7F4EE" stroke="#E7E0D7" stroke-width="2"/>
+  <circle cx="901" cy="292" r="78" fill="#C53A2D"/>
+  <text x="854" y="308" fill="#FFFFFF" font-family="Manrope, Arial, sans-serif" font-size="38" font-weight="900">SOS</text>
+  <rect x="824" y="398" width="154" height="20" rx="10" fill="#0B3D2E" opacity="0.18"/>
+  <rect x="850" y="430" width="102" height="16" rx="8" fill="#E7E0D7"/>
 </svg>

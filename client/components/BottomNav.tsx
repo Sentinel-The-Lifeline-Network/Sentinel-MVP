@@ -53,10 +53,8 @@ export default function BottomNav() {
       aria-label="Primary navigation"
       className="lg:hidden fixed bottom-0 left-0 right-0 z-50"
       style={{
-        background: 'rgba(5,10,20,0.92)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        borderTop: '1px solid rgba(255,255,255,0.05)',
+        background: '#FFFFFF',
+        borderTop: '1px solid #E7E0D7',
       }}
     >
       <div className="max-w-[430px] mx-auto flex items-center justify-around px-2 pt-2.5 pb-5 safe-bottom">
@@ -73,15 +71,15 @@ export default function BottomNav() {
                 whileTap={{ scale: 0.82 }}
                 transition={{ type: 'spring', stiffness: 600, damping: 28 }}
                 className="relative flex items-center justify-center w-10 h-10 rounded-2xl transition-all"
-                style={{ background: isActive ? 'rgba(239,68,68,0.12)' : 'transparent' }}
+                style={{ background: isActive ? '#EDE0DD' : 'transparent' }}
               >
-                <span style={{ color: isActive ? '#EF4444' : '#475569' }}>
+                <span style={{ color: isActive ? '#0B3D2E' : '#6B6B6B' }}>
                   {item.icon}
                 </span>
               </motion.div>
               <span
                 className="text-[10px] font-semibold tracking-wide transition-colors"
-                style={{ color: isActive ? '#EF4444' : '#475569' }}
+                style={{ color: isActive ? '#0B3D2E' : '#6B6B6B' }}
               >
                 {item.label}
               </span>

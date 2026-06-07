@@ -5,7 +5,7 @@ export default function OfflinePage() {
   return (
     <div
       className="min-h-dvh flex flex-col items-center justify-center px-6 text-center"
-      style={{ background: '#020617' }}
+      style={{ background: '#F7F4EE' }}
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
@@ -14,9 +14,9 @@ export default function OfflinePage() {
       >
         <div
           className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6"
-          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}
+          style={{ background: '#EDE0DD', border: '1px solid #E7E0D7' }}
         >
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C53A2D" strokeWidth="1.5" strokeLinecap="round">
             <line x1="1" y1="1" x2="23" y2="23" />
             <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
             <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
@@ -27,14 +27,14 @@ export default function OfflinePage() {
           </svg>
         </div>
 
-        <h1 className="text-2xl font-black text-white mb-2">You're Offline</h1>
+        <h1 className="text-2xl font-black mb-2" style={{ color: '#151515' }}>You're Offline</h1>
         <p className="text-muted text-sm mb-6 max-w-[280px] mx-auto">
           Sentinel requires a network connection to send emergency alerts and track your location.
         </p>
 
         <div
           className="glass-card rounded-2xl p-4 text-left mb-6 max-w-[320px] mx-auto"
-          style={{ borderLeft: '3px solid rgba(239,68,68,0.5)' }}
+          style={{ borderLeft: '3px solid #C53A2D' }}
         >
           <p className="text-xs font-bold text-emergency-red uppercase tracking-wide mb-2">What to do</p>
           <ul className="text-sm text-muted space-y-1.5">
@@ -47,7 +47,7 @@ export default function OfflinePage() {
         <button
           onClick={() => window.location.reload()}
           className="px-8 py-3 rounded-2xl text-sm font-bold text-white transition-all active:scale-95"
-          style={{ background: '#EF4444' }}
+          style={{ background: '#C53A2D' }}
         >
           Try Again
         </button>

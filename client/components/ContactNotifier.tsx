@@ -56,7 +56,7 @@ export default function ContactNotifier({ contacts, trackingUrl, userName, alert
     return (
       <div className="glass-card rounded-2xl p-4 text-center">
         <p className="text-sm text-muted">No contacts set for notification.</p>
-        <a href="/contacts" className="text-xs font-semibold mt-1 block" style={{ color: '#00C2A8' }}>
+        <a href="/contacts" className="text-xs font-semibold mt-1 block" style={{ color: '#0B3D2E' }}>
           Add emergency contacts →
         </a>
       </div>
@@ -70,9 +70,9 @@ export default function ContactNotifier({ contacts, trackingUrl, userName, alert
         onClick={copyMessage}
         className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all active:scale-[0.98]"
         style={{
-          background: copied ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.05)',
-          color: copied ? '#10B981' : '#94A3B8',
-          border: '1px solid rgba(255,255,255,0.06)',
+          background: copied ? '#F7F4EE' : '#FFFFFF',
+          color: copied ? '#0B3D2E' : '#6B6B6B',
+          border: '1px solid #E7E0D7',
         }}
       >
         {copied ? (
@@ -98,18 +98,18 @@ export default function ContactNotifier({ contacts, trackingUrl, userName, alert
             <div className="flex items-center gap-3 mb-3">
               <div
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #0F4C81, #00C2A8)' }}
+                style={{ background: '#F7F4EE', color: '#0B3D2E', border: '1px solid #E7E0D7' }}
               >
                 {initials}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">{contact.full_name}</p>
+                <p className="text-sm font-semibold truncate" style={{ color: '#151515' }}>{contact.full_name}</p>
                 <p className="text-xs text-muted truncate">{contact.relationship} · {contact.phone}</p>
               </div>
               {isSent && (
                 <span
                   className="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
-                  style={{ background: 'rgba(16,185,129,0.15)', color: '#10B981' }}
+                  style={{ background: '#F7F4EE', color: '#0B3D2E', border: '1px solid #E7E0D7' }}
                 >
                   NOTIFIED
                 </span>
@@ -121,7 +121,7 @@ export default function ContactNotifier({ contacts, trackingUrl, userName, alert
                 href={smsUrl(contact.phone)}
                 onClick={() => markSent(contact.id)}
                 className="flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-95"
-                style={{ background: 'rgba(96,165,250,0.1)', color: '#60A5FA', border: '1px solid rgba(96,165,250,0.12)' }}
+                style={{ background: '#EDE0DD', color: '#C53A2D', border: '1px solid #E7E0D7' }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 SMS
@@ -130,7 +130,7 @@ export default function ContactNotifier({ contacts, trackingUrl, userName, alert
               <a
                 href={`tel:${contact.phone}`}
                 className="flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-95"
-                style={{ background: 'rgba(16,185,129,0.1)', color: '#10B981', border: '1px solid rgba(16,185,129,0.12)' }}
+                style={{ background: '#F7F4EE', color: '#0B3D2E', border: '1px solid #E7E0D7' }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.06 6.06l1.06-1.06a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                 Call

@@ -61,8 +61,8 @@ export default function Sidebar() {
     <aside
       className="hidden lg:flex flex-col fixed left-0 top-0 h-full w-64 z-40"
       style={{
-        background: 'linear-gradient(180deg, #080E1C 0%, #050A14 100%)',
-        borderRight: '1px solid rgba(255,255,255,0.05)',
+        background: '#FFFFFF',
+        borderRight: '1px solid #E7E0D7',
       }}
     >
       {/* Logo */}
@@ -71,8 +71,7 @@ export default function Sidebar() {
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
             style={{
-              background: 'linear-gradient(135deg, #DC2626, #991B1B)',
-              boxShadow: '0 0 20px rgba(220,38,38,0.4)',
+              background: '#0B3D2E',
             }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
@@ -80,7 +79,7 @@ export default function Sidebar() {
             </svg>
           </div>
           <div>
-            <h1 className="text-lg font-black text-white tracking-tight">Sentinel</h1>
+            <h1 className="text-lg font-black tracking-tight" style={{ color: '#151515' }}>Sentinel</h1>
             <p className="text-[10px] text-muted tracking-widest uppercase -mt-0.5">Lifeline Network</p>
           </div>
         </div>
@@ -90,13 +89,13 @@ export default function Sidebar() {
       {isEmergencyActive && (
         <motion.div
           className="mx-4 mb-4 rounded-xl px-3 py-2.5 flex items-center gap-2"
-          style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)' }}
+          style={{ background: '#EDE0DD', border: '1px solid #E7E0D7' }}
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
         >
           <motion.div
             className="w-2 h-2 rounded-full flex-shrink-0"
-            style={{ background: '#EF4444' }}
+            style={{ background: '#C53A2D' }}
             animate={{ opacity: [1, 0.3, 1] }}
             transition={{ duration: 1.2, repeat: Infinity }}
           />
@@ -116,24 +115,24 @@ export default function Sidebar() {
               href={item.href}
               className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group"
               style={{
-                background: isActive ? 'rgba(239,68,68,0.1)' : 'transparent',
-                color: isActive ? '#F87171' : '#64748B',
+                background: isActive ? '#EDE0DD' : 'transparent',
+                color: isActive ? '#0B3D2E' : '#6B6B6B',
               }}
             >
               <span
                 className="transition-colors"
-                style={{ color: isActive ? '#EF4444' : '#64748B' }}
+                style={{ color: isActive ? '#0B3D2E' : '#6B6B6B' }}
               >
                 {item.icon}
               </span>
               <span
                 className="text-sm font-medium transition-colors"
-                style={{ color: isActive ? '#F1F5F9' : '#64748B' }}
+                style={{ color: isActive ? '#151515' : '#6B6B6B' }}
               >
                 {item.label}
               </span>
               {isActive && (
-                <div className="ml-auto w-1 h-4 rounded-full" style={{ background: '#EF4444' }} />
+                <div className="ml-auto w-1 h-4 rounded-full" style={{ background: '#0B3D2E' }} />
               )}
             </Link>
           );
@@ -141,17 +140,16 @@ export default function Sidebar() {
       </nav>
 
       {/* System status */}
-      <div className="px-4 pb-6 pt-4 border-t border-white/5">
+      <div className="px-4 pb-6 pt-4" style={{ borderTop: '1px solid #E7E0D7' }}>
         <div className="glass-card rounded-xl p-3">
           <div className="flex items-center gap-2 mb-2">
             <div
               className="w-1.5 h-1.5 rounded-full"
               style={{
-                background: isEmergencyActive ? '#EF4444' : '#10B981',
-                boxShadow: isEmergencyActive ? '0 0 8px rgba(239,68,68,0.8)' : '0 0 8px rgba(16,185,129,0.8)',
+                background: isEmergencyActive ? '#C53A2D' : '#1F5A47',
               }}
             />
-            <span className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: isEmergencyActive ? '#F87171' : '#10B981' }}>
+            <span className="text-[10px] font-semibold tracking-widest uppercase" style={{ color: isEmergencyActive ? '#C53A2D' : '#1F5A47' }}>
               {isEmergencyActive ? 'Emergency Mode' : 'System Ready'}
             </span>
           </div>

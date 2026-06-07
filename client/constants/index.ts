@@ -1,13 +1,13 @@
 export const COLORS = {
-  background: '#020617',
-  surface: '#0F172A',
-  card: '#111827',
-  securityBlue: '#0F4C81',
-  emergencyRed: '#EF4444',
-  successGreen: '#10B981',
-  accentTeal: '#00C2A8',
-  text: '#FFFFFF',
-  muted: '#94A3B8',
+  background: '#F7F4EE',
+  surface: '#FFFFFF',
+  card: '#FFFFFF',
+  securityBlue: '#0B3D2E',
+  emergencyRed: '#C53A2D',
+  successGreen: '#1F5A47',
+  accentTeal: '#0B3D2E',
+  text: '#151515',
+  muted: '#6B6B6B',
 } as const;
 
 export const ALERT_STATUS = {

@@ -49,7 +49,7 @@ export default function ResponderAlertPage({ params }: { params: { id: string } 
 
   if (loading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center" style={{ background: '#020617' }}>
+      <div className="min-h-dvh flex items-center justify-center" style={{ background: '#F7F4EE' }}>
         <div className="w-10 h-10 rounded-full border-2 border-accent-teal border-t-transparent animate-spin" />
       </div>
     );
@@ -57,9 +57,9 @@ export default function ResponderAlertPage({ params }: { params: { id: string } 
 
   if (!alert) {
     return (
-      <div className="min-h-dvh flex items-center justify-center px-6 text-center" style={{ background: '#020617' }}>
+      <div className="min-h-dvh flex items-center justify-center px-6 text-center" style={{ background: '#F7F4EE' }}>
         <div>
-          <p className="text-white font-bold">Alert not found</p>
+          <p className="font-bold" style={{ color: '#151515' }}>Alert not found</p>
           <button onClick={() => router.back()} className="mt-4 text-sm text-muted">Go back</button>
         </div>
       </div>
@@ -75,14 +75,13 @@ export default function ResponderAlertPage({ params }: { params: { id: string } 
   ];
 
   return (
-    <div className="min-h-dvh flex flex-col" style={{ background: '#020617' }}>
+    <div className="min-h-dvh flex flex-col" style={{ background: '#F7F4EE' }}>
       {/* Header */}
       <div
         className="px-6 pt-12 pb-4 sticky top-0 z-20"
         style={{
-          background: 'rgba(2,6,23,0.95)',
-          backdropFilter: 'blur(16px)',
-          borderBottom: '1px solid rgba(0,194,168,0.1)',
+          background: '#FFFFFF',
+          borderBottom: '1px solid #E7E0D7',
         }}
       >
         <button
@@ -94,7 +93,7 @@ export default function ResponderAlertPage({ params }: { params: { id: string } 
         </button>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-xl font-black text-white">{alert.users.full_name}</h1>
+            <h1 className="text-xl font-black" style={{ color: '#151515' }}>{alert.users.full_name}</h1>
             <p className="text-muted text-sm">{alert.users.phone}</p>
           </div>
           <StatusBadge status={alert.status} />
@@ -121,34 +120,34 @@ export default function ResponderAlertPage({ params }: { params: { id: string } 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted">Name</span>
-              <span className="text-sm font-semibold text-white">{alert.users.full_name}</span>
+              <span className="text-sm font-semibold" style={{ color: '#151515' }}>{alert.users.full_name}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted">Phone</span>
-              <a href={`tel:${alert.users.phone}`} className="text-sm font-semibold" style={{ color: '#60A5FA' }}>
+              <a href={`tel:${alert.users.phone}`} className="text-sm font-semibold" style={{ color: '#0B3D2E' }}>
                 {alert.users.phone}
               </a>
             </div>
             {alert.users.email && (
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted">Email</span>
-                <span className="text-sm font-semibold text-white">{alert.users.email}</span>
+                <span className="text-sm font-semibold" style={{ color: '#151515' }}>{alert.users.email}</span>
               </div>
             )}
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted">Notifications Sent</span>
-              <span className="text-sm font-semibold text-white">{alert.alert_notifications.length}</span>
+              <span className="text-sm font-semibold" style={{ color: '#151515' }}>{alert.alert_notifications.length}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted">Location Points</span>
-              <span className="text-sm font-semibold text-white">{alert.location_history.length}</span>
+              <span className="text-sm font-semibold" style={{ color: '#151515' }}>{alert.location_history.length}</span>
             </div>
           </div>
         </motion.div>
 
         {/* Timeline */}
         <div className="glass-card rounded-2xl p-5">
-          <h3 className="text-sm font-bold text-white mb-4">Incident Timeline</h3>
+          <h3 className="text-sm font-bold mb-4" style={{ color: '#151515' }}>Incident Timeline</h3>
           <EmergencyTimeline steps={timelineSteps} />
         </div>
 
@@ -158,7 +157,7 @@ export default function ResponderAlertPage({ params }: { params: { id: string } 
             onClick={handleResolve}
             disabled={resolving}
             className="w-full py-4 rounded-2xl text-sm font-bold text-white transition-all active:scale-[0.98] disabled:opacity-60"
-            style={{ background: '#10B981' }}
+            style={{ background: '#0B3D2E' }}
           >
             {resolving ? 'Resolving...' : 'Mark as Resolved'}
           </button>

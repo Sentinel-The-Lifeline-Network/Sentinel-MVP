@@ -3,9 +3,9 @@ interface StatusBadgeProps {
 }
 
 const config = {
-  active: { label: 'Active', color: '#EF4444', bg: 'rgba(239,68,68,0.12)', dot: '#EF4444' },
-  resolved: { label: 'Resolved', color: '#10B981', bg: 'rgba(16,185,129,0.12)', dot: '#10B981' },
-  cancelled: { label: 'Cancelled', color: '#94A3B8', bg: 'rgba(148,163,184,0.12)', dot: '#94A3B8' },
+  active: { label: 'Active', color: '#C53A2D', bg: '#EDE0DD', dot: '#C53A2D' },
+  resolved: { label: 'Resolved', color: '#0B3D2E', bg: '#F7F4EE', dot: '#1F5A47' },
+  cancelled: { label: 'Cancelled', color: '#6B6B6B', bg: '#F7F4EE', dot: '#6B6B6B' },
 };
 
 export default function StatusBadge({ status }: StatusBadgeProps) {
@@ -13,7 +13,7 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
   return (
     <span
       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-      style={{ color, background: bg }}
+      style={{ color, background: bg, border: '1px solid #E7E0D7' }}
     >
       <span className="w-1.5 h-1.5 rounded-full" style={{ background: dot }} />
       {label}

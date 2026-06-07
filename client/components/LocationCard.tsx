@@ -33,9 +33,9 @@ export default function LocationCard({ latitude, longitude, timestamp, label = '
         <div className="flex items-center gap-2">
           <div
             className="w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{ background: 'rgba(0,194,168,0.15)' }}
+            style={{ background: '#F7F4EE' }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00C2A8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0B3D2E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
               <circle cx="12" cy="10" r="3" />
             </svg>
@@ -52,11 +52,11 @@ export default function LocationCard({ latitude, longitude, timestamp, label = '
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div className="glass rounded-xl p-3">
               <p className="text-[10px] text-muted mb-1 tracking-wide">LATITUDE</p>
-              <p className="text-sm font-mono font-semibold text-white">{formatCoord(latitude)}</p>
+              <p className="text-sm font-mono font-semibold" style={{ color: '#151515' }}>{formatCoord(latitude)}</p>
             </div>
             <div className="glass rounded-xl p-3">
               <p className="text-[10px] text-muted mb-1 tracking-wide">LONGITUDE</p>
-              <p className="text-sm font-mono font-semibold text-white">{formatCoord(longitude)}</p>
+              <p className="text-sm font-mono font-semibold" style={{ color: '#151515' }}>{formatCoord(longitude)}</p>
             </div>
           </div>
           {googleMapsUrl && (
@@ -66,9 +66,9 @@ export default function LocationCard({ latitude, longitude, timestamp, label = '
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-95"
               style={{
-                background: 'rgba(0,194,168,0.12)',
-                color: '#00C2A8',
-                border: '1px solid rgba(0,194,168,0.2)',
+                background: '#0B3D2E',
+                color: '#FFFFFF',
+                border: '1px solid #0B3D2E',
               }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

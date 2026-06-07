@@ -33,14 +33,14 @@ export default function ContactCard({ contact, index, onToggle, onDelete, onEdit
         {/* Avatar */}
         <div
           className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-          style={{ background: 'linear-gradient(135deg, #0F4C81, #00C2A8)' }}
+          style={{ background: '#F7F4EE', color: '#0B3D2E', border: '1px solid #E7E0D7' }}
         >
           {initials}
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white truncate">{contact.full_name}</p>
+          <p className="text-sm font-semibold truncate" style={{ color: '#151515' }}>{contact.full_name}</p>
           <p className="text-xs text-muted truncate">{contact.relationship} · {contact.phone}</p>
         </div>
 
@@ -49,8 +49,8 @@ export default function ContactCard({ contact, index, onToggle, onDelete, onEdit
           onClick={() => onToggle(contact.id, !contact.notification_enabled)}
           className="relative w-10 h-6 rounded-full transition-all flex-shrink-0"
           style={{
-            background: contact.notification_enabled ? '#10B981' : '#1E293B',
-            border: '2px solid rgba(255,255,255,0.08)',
+            background: contact.notification_enabled ? '#1F5A47' : '#E7E0D7',
+            border: '2px solid #E7E0D7',
           }}
           aria-label={contact.notification_enabled ? 'Disable notifications' : 'Enable notifications'}
         >
@@ -65,9 +65,9 @@ export default function ContactCard({ contact, index, onToggle, onDelete, onEdit
         <button
           onClick={() => setShowActions(!showActions)}
           className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: 'rgba(255,255,255,0.05)' }}
+          style={{ background: '#F7F4EE' }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round">
             <circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" />
           </svg>
         </button>
@@ -77,7 +77,7 @@ export default function ContactCard({ contact, index, onToggle, onDelete, onEdit
         {showActions && (
           <motion.div
             className="flex gap-2 mt-3 pt-3"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
+            style={{ borderTop: '1px solid #E7E0D7' }}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -86,21 +86,21 @@ export default function ContactCard({ contact, index, onToggle, onDelete, onEdit
             <button
               onClick={() => { onEdit(contact); setShowActions(false); }}
               className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95"
-              style={{ background: 'rgba(15,76,129,0.2)', color: '#60A5FA' }}
+              style={{ background: '#F7F4EE', color: '#0B3D2E' }}
             >
               Edit
             </button>
             <a
               href={`tel:${contact.phone}`}
               className="flex-1 py-2 rounded-xl text-xs font-semibold text-center transition-all active:scale-95"
-              style={{ background: 'rgba(16,185,129,0.15)', color: '#10B981' }}
+              style={{ background: '#F7F4EE', color: '#0B3D2E' }}
             >
               Call
             </a>
             <button
               onClick={() => { onDelete(contact.id); setShowActions(false); }}
               className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95"
-              style={{ background: 'rgba(239,68,68,0.1)', color: '#F87171' }}
+              style={{ background: '#EDE0DD', color: '#C53A2D' }}
             >
               Remove
             </button>

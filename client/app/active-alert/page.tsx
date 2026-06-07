@@ -161,28 +161,24 @@ export default function ActiveAlertPage() {
             <div
               className="glass-card rounded-2xl p-4"
               style={{
-                border: notificationSummary.failedCount > 0
-                  ? '1px solid rgba(248,113,113,0.35)'
-                  : '1px solid rgba(16,185,129,0.35)',
-                boxShadow: notificationSummary.failedCount > 0
-                  ? '0 16px 50px rgba(127,29,29,0.35)'
-                  : '0 16px 50px rgba(6,95,70,0.26)',
+                border: '1px solid #E7E0D7',
+                boxShadow: '0 12px 28px rgba(21,21,21,0.08)',
               }}
             >
               <div className="flex items-start gap-3">
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: notificationSummary.failedCount > 0 ? 'rgba(248,113,113,0.12)' : 'rgba(16,185,129,0.12)' }}
+                  style={{ background: notificationSummary.failedCount > 0 ? '#EDE0DD' : '#F7F4EE' }}
                 >
                   {notificationSummary.failedCount > 0 ? (
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F87171" strokeWidth="2.4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C53A2D" strokeWidth="2.4"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                   ) : (
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.6"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F5A47" strokeWidth="2.6"><polyline points="20 6 9 17 4 12"/></svg>
                   )}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-black text-white">
+                  <p className="text-sm font-black" style={{ color: '#151515' }}>
                     {notificationSummary.status === 'queued'
                       ? 'Notifications sending'
                       : notificationSummary.failedCount > 0
@@ -197,7 +193,7 @@ export default function ActiveAlertPage() {
                   {notificationSummary.failures.length > 0 && (
                     <div className="mt-2 space-y-1">
                       {notificationSummary.failures.slice(0, 3).map((failure) => (
-                        <p key={`${failure.contactId}-${failure.channel}`} className="text-[11px] leading-relaxed" style={{ color: '#FCA5A5' }}>
+                        <p key={`${failure.contactId}-${failure.channel}`} className="text-[11px] leading-relaxed" style={{ color: '#C53A2D' }}>
                           {failure.channel.toUpperCase()} failed for {failure.contactName || 'contact'}: {failure.message}
                         </p>
                       ))}
@@ -208,7 +204,7 @@ export default function ActiveAlertPage() {
                 <button
                   onClick={() => setShowNotificationPopup(false)}
                   className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(255,255,255,0.06)', color: '#94A3B8' }}
+                  style={{ background: '#F7F4EE', color: '#6B6B6B' }}
                   aria-label="Close notification status"
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -221,20 +217,20 @@ export default function ActiveAlertPage() {
 
       <div
         className="sticky top-0 z-20 px-4 lg:px-8 pt-12 pb-4"
-        style={{ background: 'rgba(2,6,23,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(239,68,68,0.12)' }}
+        style={{ background: '#FFFFFF', borderBottom: '1px solid #E7E0D7' }}
       >
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-0.5">
               <motion.div
                 className="w-2 h-2 rounded-full"
-                style={{ background: '#EF4444', boxShadow: '0 0 10px rgba(239,68,68,0.9)' }}
+                style={{ background: '#C53A2D' }}
                 animate={{ opacity: [1, 0.35, 1] }}
                 transition={{ duration: 1, repeat: Infinity }}
               />
               <span className="text-[10px] font-black tracking-[0.2em] uppercase text-emergency-red">SOS Alert Active</span>
             </div>
-            <h1 className="text-2xl font-black text-white">Emergency Mode</h1>
+            <h1 className="text-2xl font-black" style={{ color: '#151515' }}>Emergency Mode</h1>
           </div>
           <div className="text-right">
             <p className="text-[10px] text-muted tracking-wide uppercase">Elapsed</p>
@@ -247,9 +243,9 @@ export default function ActiveAlertPage() {
         <div className="max-w-2xl mx-auto space-y-4">
           <div className="grid grid-cols-3 gap-2">
             {[
-              { label: 'GPS', value: alert?.last_latitude ? 'Active' : 'Searching', color: alert?.last_latitude ? '#10B981' : '#F59E0B', icon: 'GPS' },
-              { label: 'Contacts', value: alert?.sync_status === 'pending' ? 'Queued' : 'Auto-sent', color: alert?.sync_status === 'pending' ? '#F59E0B' : '#10B981', icon: 'SMS' },
-              { label: 'Tracking', value: trackingUrl ? 'Live' : 'Pending', color: trackingUrl ? '#EF4444' : '#F59E0B', icon: 'LIVE' },
+              { label: 'GPS', value: alert?.last_latitude ? 'Active' : 'Searching', color: alert?.last_latitude ? '#1F5A47' : '#6B6B6B', icon: 'GPS' },
+              { label: 'Contacts', value: alert?.sync_status === 'pending' ? 'Queued' : 'Auto-sent', color: alert?.sync_status === 'pending' ? '#6B6B6B' : '#1F5A47', icon: 'SMS' },
+              { label: 'Tracking', value: trackingUrl ? 'Live' : 'Pending', color: trackingUrl ? '#C53A2D' : '#6B6B6B', icon: 'LIVE' },
             ].map((s) => (
               <div key={s.label} className="glass-card rounded-2xl p-3 text-center">
                 <div className="text-[10px] font-black mb-1" style={{ color: s.color }}>{s.icon}</div>
@@ -272,12 +268,12 @@ export default function ActiveAlertPage() {
                 <div className="flex items-center gap-3">
                   <div
                     className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'rgba(16,185,129,0.12)' }}
+                    style={{ background: '#F7F4EE' }}
                   >
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1F5A47" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-white">Contacts notified automatically</p>
+                    <p className="text-sm font-bold" style={{ color: '#151515' }}>Contacts notified automatically</p>
                     <p className="text-xs text-muted mt-0.5">SMS and email alerts are sent immediately from the SOS request. Repeat messages continue every 5 minutes until you mark safe or cancel.</p>
                   </div>
                 </div>
@@ -290,7 +286,7 @@ export default function ActiveAlertPage() {
               />
 
               <div className="glass-card rounded-2xl p-4">
-                <h3 className="text-xs font-bold text-white tracking-widest uppercase mb-4">Timeline</h3>
+                <h3 className="text-xs font-bold tracking-widest uppercase mb-4" style={{ color: '#151515' }}>Timeline</h3>
                 <EmergencyTimeline steps={timelineSteps} />
               </div>
 
@@ -299,14 +295,14 @@ export default function ActiveAlertPage() {
                   <p className="text-[10px] text-muted uppercase tracking-wider mb-2">Shareable Tracking Link</p>
                   <div
                     className="rounded-xl px-3 py-2 mb-2 font-mono text-xs truncate"
-                    style={{ background: '#0F172A', color: '#00C2A8' }}
+                    style={{ background: '#F7F4EE', color: '#0B3D2E', border: '1px solid #E7E0D7' }}
                   >
                     {trackingUrl}
                   </div>
                   <button
                     onClick={copyLink}
                     className="w-full py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95"
-                    style={{ background: 'rgba(0,194,168,0.12)', color: '#00C2A8', border: '1px solid rgba(0,194,168,0.2)' }}
+                    style={{ background: '#0B3D2E', color: '#FFFFFF', border: '1px solid #0B3D2E' }}
                   >
                     Share Live Tracking Link
                   </button>
@@ -319,7 +315,7 @@ export default function ActiveAlertPage() {
             <button
               onClick={() => setShowMarkSafeModal(true)}
               className="py-4 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
-              style={{ background: 'rgba(16,185,129,0.12)', color: '#10B981', border: '1px solid rgba(16,185,129,0.2)' }}
+              style={{ background: '#FFFFFF', color: '#0B3D2E', border: '1px solid #0B3D2E' }}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
               Mark Myself Safe
@@ -327,7 +323,7 @@ export default function ActiveAlertPage() {
             <button
               onClick={() => setShowStopModal(true)}
               className="py-4 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all active:scale-95"
-              style={{ background: 'rgba(239,68,68,0.1)', color: '#F87171', border: '1px solid rgba(239,68,68,0.2)' }}
+              style={{ background: '#EDE0DD', color: '#C53A2D', border: '1px solid #E7E0D7' }}
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
               Stop Alert
@@ -335,10 +331,10 @@ export default function ActiveAlertPage() {
           </div>
 
           {error && (
-            <p className="text-sm text-center font-medium py-2" style={{ color: '#F87171' }}>{error}</p>
+            <p className="text-sm text-center font-medium py-2" style={{ color: '#C53A2D' }}>{error}</p>
           )}
           {syncStatus && (
-            <p className="text-sm text-center font-semibold py-2" style={{ color: alert?.sync_status === 'pending' ? '#FBBF24' : '#00C2A8' }} role="status" aria-live="assertive">
+            <p className="text-sm text-center font-semibold py-2" style={{ color: alert?.sync_status === 'pending' ? '#6B6B6B' : '#0B3D2E' }} role="status" aria-live="assertive">
               {syncStatus}
             </p>
           )}

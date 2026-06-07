@@ -35,7 +35,7 @@ export default function PinConfirmModal({
     onCancel();
   };
 
-  const confirmColor = variant === 'safe' ? '#10B981' : '#EF4444';
+  const confirmColor = variant === 'safe' ? '#0B3D2E' : '#C53A2D';
 
   return (
     <AnimatePresence>
@@ -49,7 +49,7 @@ export default function PinConfirmModal({
           {/* Backdrop */}
           <motion.div
             className="absolute inset-0"
-            style={{ background: 'rgba(2,6,23,0.8)', backdropFilter: 'blur(4px)' }}
+            style={{ background: 'rgba(21,21,21,0.36)' }}
             onClick={handleCancel}
           />
 
@@ -61,7 +61,7 @@ export default function PinConfirmModal({
             exit={{ y: 60, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           >
-            <h3 className="text-lg font-bold text-white mb-1">{title}</h3>
+            <h3 className="text-lg font-bold mb-1" style={{ color: '#151515' }}>{title}</h3>
             <p className="text-sm text-muted mb-5">{description}</p>
 
             <div className="mb-4">
@@ -75,10 +75,11 @@ export default function PinConfirmModal({
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                 placeholder="Enter PIN"
-                className="w-full px-4 py-3 rounded-xl text-white text-center text-xl tracking-widest font-mono outline-none"
+                className="w-full px-4 py-3 rounded-xl text-center text-xl tracking-widest font-mono outline-none"
                 style={{
-                  background: '#0F172A',
-                  border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#151515',
+                  background: '#F7F4EE',
+                  border: '1px solid #E7E0D7',
                   caretColor: confirmColor,
                 }}
               />
@@ -88,7 +89,7 @@ export default function PinConfirmModal({
               <button
                 onClick={handleCancel}
                 className="flex-1 py-3 rounded-xl text-sm font-semibold text-muted transition-all active:scale-95"
-                style={{ background: 'rgba(148,163,184,0.1)', border: '1px solid rgba(255,255,255,0.07)' }}
+                style={{ background: '#FFFFFF', border: '1px solid #E7E0D7', color: '#6B6B6B' }}
               >
                 Cancel
               </button>

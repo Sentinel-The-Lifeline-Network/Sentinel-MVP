@@ -49,7 +49,7 @@ export default function ProfilePage() {
     <div className="min-h-dvh flex flex-col mesh-bg">
       <div className="px-5 pt-14 pb-4 lg:pt-10">
         <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-muted mb-1">My</p>
-        <h1 className="text-3xl font-black text-white tracking-tight">Profile</h1>
+        <h1 className="text-3xl font-black tracking-tight" style={{ color: '#151515' }}>Profile</h1>
       </div>
 
       <div className="flex-1 px-5 pb-28 space-y-4 max-w-lg">
@@ -61,26 +61,26 @@ export default function ProfilePage() {
         >
           <div
             className="w-16 h-16 rounded-3xl flex items-center justify-center text-xl font-black flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #DC2626, #991B1B)', boxShadow: '0 0 24px rgba(220,38,38,0.35)' }}
+            style={{ background: '#F7F4EE', color: '#0B3D2E', border: '1px solid #E7E0D7' }}
           >
             {initials}
           </div>
           <div>
-            <p className="text-white font-bold text-lg leading-tight">{form.full_name || 'Your Name'}</p>
+            <p className="font-bold text-lg leading-tight" style={{ color: '#151515' }}>{form.full_name || 'Your Name'}</p>
             <p className="text-muted text-xs mt-0.5">{profile?.email || 'Sentinel User'}</p>
             <div
               className="mt-1.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full"
-              style={{ background: 'rgba(16,185,129,0.12)' }}
+              style={{ background: '#F7F4EE', border: '1px solid #E7E0D7' }}
             >
-              <div className="w-1 h-1 rounded-full" style={{ background: '#10B981' }} />
-              <span className="text-[10px] font-semibold text-success-green">Protected</span>
+              <div className="w-1 h-1 rounded-full" style={{ background: '#1F5A47' }} />
+              <span className="text-[10px] font-semibold" style={{ color: '#0B3D2E' }}>Protected</span>
             </div>
           </div>
         </motion.div>
 
         {/* Personal info */}
         <div className="glass-card rounded-2xl p-4 space-y-4">
-          <p className="text-xs font-bold text-white tracking-widest uppercase">Personal Info</p>
+          <p className="text-xs font-bold tracking-widest uppercase" style={{ color: '#151515' }}>Personal Info</p>
           {[
             { key: 'full_name', label: 'Full Name', placeholder: 'John Doe', type: 'text' },
             { key: 'phone', label: 'Phone Number', placeholder: '+234 800 000 0000', type: 'tel' },
@@ -92,8 +92,8 @@ export default function ProfilePage() {
                 placeholder={field.placeholder}
                 value={(form as any)[field.key]}
                 onChange={(e) => setForm((f) => ({ ...f, [field.key]: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none"
-                style={{ background: '#0A0E1A', border: '1px solid rgba(255,255,255,0.08)', caretColor: '#EF4444' }}
+                className="w-full px-4 py-3 rounded-xl text-sm outline-none"
+                style={{ background: '#F7F4EE', border: '1px solid #E7E0D7', caretColor: '#C53A2D', color: '#151515' }}
               />
             </div>
           ))}
@@ -104,12 +104,12 @@ export default function ProfilePage() {
           <div className="flex items-center gap-2">
             <div
               className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(0,194,168,0.12)' }}
+              style={{ background: '#F7F4EE', border: '1px solid #E7E0D7' }}
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00C2A8" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0B3D2E" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
             <div>
-              <p className="text-xs font-bold text-white tracking-widest uppercase">Security PIN</p>
+              <p className="text-xs font-bold tracking-widest uppercase" style={{ color: '#151515' }}>Security PIN</p>
               <p className="text-[11px] text-muted">Required to stop or cancel an emergency alert</p>
             </div>
           </div>
@@ -126,24 +126,22 @@ export default function ProfilePage() {
                 placeholder={field.placeholder}
                 value={(form as any)[field.key]}
                 onChange={(e) => setForm((f) => ({ ...f, [field.key]: e.target.value.replace(/\D/g, '') }))}
-                className="w-full px-4 py-3 rounded-xl text-white text-center text-2xl font-mono tracking-[0.4em] outline-none"
-                style={{ background: '#0A0E1A', border: '1px solid rgba(255,255,255,0.08)', caretColor: '#EF4444' }}
+                className="w-full px-4 py-3 rounded-xl text-center text-2xl font-mono tracking-[0.4em] outline-none"
+                style={{ background: '#F7F4EE', border: '1px solid #E7E0D7', caretColor: '#C53A2D', color: '#151515' }}
               />
             </div>
           ))}
         </div>
 
-        {error && <p className="text-sm font-medium text-center" style={{ color: '#F87171' }}>{error}</p>}
+        {error && <p className="text-sm font-medium text-center" style={{ color: '#C53A2D' }}>{error}</p>}
 
         <button
           onClick={handleSave}
           disabled={saving}
           className="w-full py-4 rounded-2xl text-sm font-bold text-white transition-all active:scale-[0.98] disabled:opacity-60"
           style={{
-            background: saved
-              ? 'linear-gradient(135deg, #059669, #047857)'
-              : 'linear-gradient(135deg, #DC2626, #991B1B)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            background: saved ? '#1F5A47' : '#0B3D2E',
+            border: '1px solid #0B3D2E',
           }}
         >
           {saving ? 'Saving...' : saved ? '✓ Saved!' : 'Save Changes'}

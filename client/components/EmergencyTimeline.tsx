@@ -27,9 +27,8 @@ export default function EmergencyTimeline({ steps }: EmergencyTimelineProps) {
             <motion.div
               className="w-3 h-3 rounded-full mt-1 flex-shrink-0"
               style={{
-                background: step.done ? '#10B981' : '#1E293B',
-                border: step.done ? '2px solid #10B981' : '2px solid #334155',
-                boxShadow: step.done ? '0 0 8px rgba(16,185,129,0.5)' : 'none',
+                background: step.done ? '#1F5A47' : '#FFFFFF',
+                border: step.done ? '2px solid #1F5A47' : '2px solid #E7E0D7',
               }}
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
@@ -39,7 +38,7 @@ export default function EmergencyTimeline({ steps }: EmergencyTimelineProps) {
               <div
                 className="w-0.5 flex-1 mt-1 mb-1"
                 style={{
-                  background: step.done ? 'linear-gradient(to bottom, #10B981, #334155)' : '#1E293B',
+                  background: step.done ? '#1F5A47' : '#E7E0D7',
                   minHeight: 24,
                 }}
               />
@@ -50,12 +49,12 @@ export default function EmergencyTimeline({ steps }: EmergencyTimelineProps) {
           <div className="pb-4 flex-1">
             <p
               className="text-sm font-medium"
-              style={{ color: step.done ? '#F1F5F9' : '#475569' }}
+              style={{ color: step.done ? '#151515' : '#6B6B6B' }}
             >
               {step.label}
             </p>
             {step.time && (
-              <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>
+              <p className="text-xs mt-0.5" style={{ color: '#6B6B6B' }}>
                 {step.time}
               </p>
             )}

@@ -103,7 +103,7 @@ export default function ContactsPage() {
         <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-muted mb-1">Emergency</p>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-black text-white tracking-tight">Contacts</h1>
+            <h1 className="text-3xl font-black tracking-tight" style={{ color: '#151515' }}>Contacts</h1>
             <p className="text-muted text-xs mt-1">
               {contacts.filter((c) => c.notification_enabled).length} active ·{' '}
               {contacts.length} total
@@ -117,7 +117,7 @@ export default function ContactsPage() {
               disabled={importing}
               whileTap={{ scale: 0.92 }}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-50"
-              style={{ background: 'rgba(0,194,168,0.12)', color: '#00C2A8', border: '1px solid rgba(0,194,168,0.2)' }}
+              style={{ background: '#FFFFFF', color: '#0B3D2E', border: '1px solid #E7E0D7' }}
             >
               {importing ? (
                 <div className="w-3 h-3 rounded-full border border-t-transparent border-accent-teal animate-spin" />
@@ -132,9 +132,9 @@ export default function ContactsPage() {
               onClick={openAdd}
               whileTap={{ scale: 0.9 }}
               className="w-9 h-9 rounded-2xl flex items-center justify-center transition-all"
-              style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.2)' }}
+              style={{ background: '#EDE0DD', border: '1px solid #E7E0D7' }}
             >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C53A2D" strokeWidth="2.5" strokeLinecap="round">
                 <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
               </svg>
             </motion.button>
@@ -146,13 +146,13 @@ export default function ContactsPage() {
           {importResult && (
             <motion.div
               className="mt-3 rounded-xl px-3 py-2 flex items-center gap-2"
-              style={{ background: 'rgba(0,194,168,0.1)', border: '1px solid rgba(0,194,168,0.15)' }}
+              style={{ background: '#FFFFFF', border: '1px solid #E7E0D7' }}
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
             >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00C2A8" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-              <p className="text-xs font-medium" style={{ color: '#00C2A8' }}>{importResult}</p>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0B3D2E" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+              <p className="text-xs font-medium" style={{ color: '#0B3D2E' }}>{importResult}</p>
               <button onClick={() => setImportResult(null)} className="ml-auto text-muted text-xs">✕</button>
             </motion.div>
           )}
@@ -169,15 +169,14 @@ export default function ContactsPage() {
           <motion.div className="text-center pt-16" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
             <div
               className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5"
-              style={{ background: 'linear-gradient(135deg, rgba(15,76,129,0.2), rgba(0,194,168,0.1))', border: '1px solid rgba(255,255,255,0.06)' }}
+              style={{ background: '#FFFFFF', border: '1px solid #E7E0D7' }}
             >
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="url(#grad)" strokeWidth="1.5" strokeLinecap="round">
-                <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#0F4C81"/><stop offset="100%" stopColor="#00C2A8"/></linearGradient></defs>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0B3D2E" strokeWidth="1.5" strokeLinecap="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
                 <line x1="23" y1="11" x2="17" y2="11"/><line x1="20" y1="8" x2="20" y2="14"/>
               </svg>
             </div>
-            <p className="text-white font-bold text-lg">No contacts yet</p>
+            <p className="font-bold text-lg" style={{ color: '#151515' }}>No contacts yet</p>
             <p className="text-muted text-sm mt-1 max-w-[220px] mx-auto leading-relaxed">
               Add people who should be alerted when you trigger SOS
             </p>
@@ -185,14 +184,14 @@ export default function ContactsPage() {
               <button
                 onClick={importFromDevice}
                 className="px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95"
-                style={{ background: 'rgba(0,194,168,0.12)', color: '#00C2A8', border: '1px solid rgba(0,194,168,0.2)' }}
+                style={{ background: '#FFFFFF', color: '#0B3D2E', border: '1px solid #E7E0D7' }}
               >
                 Import from Phone
               </button>
               <button
                 onClick={openAdd}
                 className="px-4 py-2.5 rounded-xl text-xs font-bold text-white transition-all active:scale-95"
-                style={{ background: '#EF4444' }}
+                style={{ background: '#C53A2D' }}
               >
                 Add Manually
               </button>
@@ -225,7 +224,7 @@ export default function ContactsPage() {
           >
             <motion.div
               className="absolute inset-0"
-              style={{ background: 'rgba(2,6,23,0.8)', backdropFilter: 'blur(8px)' }}
+              style={{ background: 'rgba(21,21,21,0.36)' }}
               onClick={() => setShowForm(false)}
             />
             <motion.div
@@ -236,8 +235,8 @@ export default function ContactsPage() {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', stiffness: 380, damping: 34 }}
             >
-              <div className="w-10 h-1 rounded-full bg-white/15 mx-auto mb-5 lg:hidden" />
-              <h3 className="text-base font-black text-white mb-2">
+              <div className="w-10 h-1 rounded-full mx-auto mb-5 lg:hidden" style={{ background: '#E7E0D7' }} />
+              <h3 className="text-base font-black mb-2" style={{ color: '#151515' }}>
                 {editingContact ? 'Edit Contact' : 'New Contact'}
               </h3>
               <p className="text-xs text-muted leading-relaxed mb-5">
@@ -257,8 +256,8 @@ export default function ContactsPage() {
                       placeholder={field.placeholder}
                       value={(form as any)[field.key]}
                       onChange={(e) => setForm((f) => ({ ...f, [field.key]: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none"
-                      style={{ background: '#0A0E1A', border: '1px solid rgba(255,255,255,0.08)', caretColor: '#EF4444' }}
+                      className="w-full px-4 py-3 rounded-xl text-sm outline-none"
+                      style={{ background: '#F7F4EE', border: '1px solid #E7E0D7', caretColor: '#C53A2D', color: '#151515' }}
                     />
                   </div>
                 ))}
@@ -274,9 +273,9 @@ export default function ContactsPage() {
                         onClick={() => setForm((f) => ({ ...f, relationship: r }))}
                         className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
                         style={{
-                          background: form.relationship === r ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.05)',
-                          color: form.relationship === r ? '#F87171' : '#64748B',
-                          border: `1px solid ${form.relationship === r ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                          background: form.relationship === r ? '#EDE0DD' : '#FFFFFF',
+                          color: form.relationship === r ? '#C53A2D' : '#6B6B6B',
+                          border: '1px solid #E7E0D7',
                         }}
                       >
                         {r}
@@ -288,21 +287,21 @@ export default function ContactsPage() {
                     placeholder="Or type custom..."
                     value={form.relationship}
                     onChange={(e) => setForm((f) => ({ ...f, relationship: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl text-white text-sm outline-none"
-                    style={{ background: '#0A0E1A', border: '1px solid rgba(255,255,255,0.08)', caretColor: '#EF4444' }}
+                    className="w-full px-4 py-2.5 rounded-xl text-sm outline-none"
+                    style={{ background: '#F7F4EE', border: '1px solid #E7E0D7', caretColor: '#C53A2D', color: '#151515' }}
                   />
                 </div>
 
                 {/* Notify toggle */}
                 <div className="flex items-center justify-between py-1">
                   <div>
-                    <p className="text-sm font-semibold text-white">Alert on SOS</p>
+                    <p className="text-sm font-semibold" style={{ color: '#151515' }}>Alert on SOS</p>
                     <p className="text-xs text-muted">Automatically message this contact by SMS and email</p>
                   </div>
                   <button
                     onClick={() => setForm((f) => ({ ...f, notification_enabled: !f.notification_enabled }))}
                     className="relative w-12 h-6 rounded-full transition-all flex-shrink-0"
-                    style={{ background: form.notification_enabled ? '#10B981' : '#1E293B' }}
+                    style={{ background: form.notification_enabled ? '#1F5A47' : '#E7E0D7' }}
                   >
                     <motion.div
                       className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow"
@@ -312,13 +311,13 @@ export default function ContactsPage() {
                   </button>
                 </div>
 
-                {formError && <p className="text-sm font-medium text-center" style={{ color: '#F87171' }}>{formError}</p>}
+                {formError && <p className="text-sm font-medium text-center" style={{ color: '#C53A2D' }}>{formError}</p>}
 
                 <button
                   onClick={handleSave}
                   disabled={saving}
                   className="w-full py-3.5 rounded-2xl text-sm font-bold text-white transition-all active:scale-[0.98] disabled:opacity-60"
-                  style={{ background: 'linear-gradient(135deg, #DC2626, #991B1B)', boxShadow: '0 4px 20px rgba(220,38,38,0.25)' }}
+                  style={{ background: '#0B3D2E' }}
                 >
                   {saving ? 'Saving...' : editingContact ? 'Save Changes' : 'Add Contact'}
                 </button>
