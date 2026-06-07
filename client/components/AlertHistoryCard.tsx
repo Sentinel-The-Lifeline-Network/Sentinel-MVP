@@ -29,7 +29,7 @@ export default function AlertHistoryCard({ alert, index }: AlertHistoryCardProps
     >
       <Link
         href={`/history/${alert.id}`}
-        className="block glass-card rounded-2xl p-4 active:scale-[0.98] transition-transform"
+        className="block sentinel-card rounded-2xl p-4 active:scale-[0.98] transition-transform"
       >
         <div className="flex items-start justify-between mb-2">
           <div>

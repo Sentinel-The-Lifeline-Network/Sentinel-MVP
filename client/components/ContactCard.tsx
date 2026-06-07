@@ -27,7 +27,7 @@ export default function ContactCard({ contact, index, onToggle, onDelete, onEdit
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ delay: index * 0.07, duration: 0.35 }}
-      className="glass-card rounded-2xl p-4"
+      className="sentinel-card rounded-2xl p-4"
     >
       <div className="flex items-center gap-3">
         {/* Avatar */}

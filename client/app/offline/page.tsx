@@ -33,7 +33,7 @@ export default function OfflinePage() {
         </p>
 
         <div
-          className="glass-card rounded-2xl p-4 text-left mb-6 max-w-[320px] mx-auto"
+          className="sentinel-card rounded-2xl p-4 text-left mb-6 max-w-[320px] mx-auto"
           style={{ borderLeft: '3px solid #C53A2D' }}
         >
           <p className="text-xs font-bold text-emergency-red uppercase tracking-wide mb-2">What to do</p>

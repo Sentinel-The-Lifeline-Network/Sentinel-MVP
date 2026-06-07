@@ -38,7 +38,7 @@ export default function ProfileSetupSheet({ onComplete }: Props) {
     >
       <div className="absolute inset-0" style={{ background: 'rgba(21,21,21,0.36)' }} />
       <motion.div
-        className="relative w-full max-w-sm glass rounded-t-3xl lg:rounded-3xl p-6 pb-10 lg:pb-6"
+        className="relative w-full max-w-sm sentinel-surface rounded-t-3xl lg:rounded-3xl p-6 pb-10 lg:pb-6"
         initial={{ y: 80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 350, damping: 32 }}
@@ -67,8 +67,7 @@ export default function ProfileSetupSheet({ onComplete }: Props) {
               placeholder="Jane Doe"
               value={form.full_name}
               onChange={(e) => setForm((f) => ({ ...f, full_name: e.target.value }))}
-              className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-              style={{ background: '#F7F4EE', border: '1px solid #E7E0D7', caretColor: '#C53A2D', color: '#151515' }}
+              className="sentinel-input w-full px-4 py-3 rounded-xl text-sm outline-none"
             />
           </div>
           <div>
@@ -78,8 +77,7 @@ export default function ProfileSetupSheet({ onComplete }: Props) {
               placeholder="+234..."
               value={form.phone}
               onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-              className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-              style={{ background: '#F7F4EE', border: '1px solid #E7E0D7', caretColor: '#C53A2D', color: '#151515' }}
+              className="sentinel-input w-full px-4 py-3 rounded-xl text-sm outline-none"
             />
           </div>
           <div>
@@ -91,8 +89,7 @@ export default function ProfileSetupSheet({ onComplete }: Props) {
               placeholder="4–8 digits"
               value={form.security_pin}
               onChange={(e) => setForm((f) => ({ ...f, security_pin: e.target.value.replace(/\D/g, '') }))}
-              className="w-full px-4 py-3 rounded-xl text-center text-xl font-mono tracking-widest outline-none"
-              style={{ background: '#F7F4EE', border: '1px solid #E7E0D7', caretColor: '#C53A2D', color: '#151515' }}
+              className="sentinel-input w-full px-4 py-3 rounded-xl text-center text-xl font-mono tracking-widest outline-none"
             />
           </div>
 

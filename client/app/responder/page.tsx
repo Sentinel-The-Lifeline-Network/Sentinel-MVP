@@ -99,7 +99,7 @@ export default function ResponderPage() {
 
         {loading ? (
           <div className="flex items-center justify-center pt-12">
-            <div className="w-8 h-8 rounded-full border-2 border-accent-teal border-t-transparent animate-spin" />
+            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
           </div>
         ) : alerts.length === 0 ? (
           <motion.div className="text-center pt-12" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

@@ -2,10 +2,10 @@ export const COLORS = {
   background: '#F7F4EE',
   surface: '#FFFFFF',
   card: '#FFFFFF',
-  securityBlue: '#0B3D2E',
   emergencyRed: '#C53A2D',
   successGreen: '#1F5A47',
-  accentTeal: '#0B3D2E',
+  primary: '#0B3D2E',
+  primaryLight: '#1F5A47',
   text: '#151515',
   muted: '#6B6B6B',
 } as const;

@@ -141,7 +141,7 @@ export default function Sidebar() {
 
       {/* System status */}
       <div className="px-4 pb-6 pt-4" style={{ borderTop: '1px solid #E7E0D7' }}>
-        <div className="glass-card rounded-xl p-3">
+        <div className="sentinel-card rounded-xl p-3">
           <div className="flex items-center gap-2 mb-2">
             <div
               className="w-1.5 h-1.5 rounded-full"

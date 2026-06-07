@@ -143,7 +143,7 @@ export default function TrackPage({ params }: { params: { token: string } }) {
 
         {/* Location history count */}
         {data.location_history.length > 0 && (
-          <div className="glass-card rounded-2xl p-4 flex items-center gap-3">
+          <div className="sentinel-card rounded-2xl p-4 flex items-center gap-3">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
               style={{ background: '#F7F4EE', border: '1px solid #E7E0D7' }}
@@ -160,17 +160,17 @@ export default function TrackPage({ params }: { params: { token: string } }) {
         )}
 
         {/* Timeline */}
-        <div className="glass-card rounded-2xl p-5">
+        <div className="sentinel-card rounded-2xl p-5">
           <h3 className="text-sm font-bold mb-4" style={{ color: '#151515' }}>Alert Timeline</h3>
           <EmergencyTimeline steps={timelineSteps} />
         </div>
 
         {/* Instructions */}
         <div
-          className="glass-card rounded-2xl p-4"
+          className="sentinel-card rounded-2xl p-4"
           style={{ borderLeft: '3px solid #0B3D2E' }}
         >
-          <p className="text-xs font-bold text-accent-teal tracking-wide uppercase mb-2">Contact Instructions</p>
+          <p className="text-xs font-bold text-primary tracking-wide uppercase mb-2">Contact Instructions</p>
           <ul className="text-sm text-muted space-y-1.5">
             <li>• Call the person directly if you can reach them</li>
             <li>• Contact emergency services (911) if needed</li>

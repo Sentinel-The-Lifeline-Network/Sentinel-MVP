@@ -55,7 +55,7 @@ export default function ProfilePage() {
       <div className="flex-1 px-5 pb-28 space-y-4 max-w-lg">
         {/* Avatar */}
         <motion.div
-          className="flex items-center gap-4 glass-card rounded-2xl p-4"
+          className="flex items-center gap-4 sentinel-card rounded-2xl p-4"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
         >
@@ -79,7 +79,7 @@ export default function ProfilePage() {
         </motion.div>
 
         {/* Personal info */}
-        <div className="glass-card rounded-2xl p-4 space-y-4">
+        <div className="sentinel-card rounded-2xl p-4 space-y-4">
           <p className="text-xs font-bold tracking-widest uppercase" style={{ color: '#151515' }}>Personal Info</p>
           {[
             { key: 'full_name', label: 'Full Name', placeholder: 'John Doe', type: 'text' },
@@ -99,7 +99,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Security PIN */}
-        <div className="glass-card rounded-2xl p-4 space-y-4">
+        <div className="sentinel-card rounded-2xl p-4 space-y-4">
           <div className="flex items-center gap-2">
             <div
               className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0"

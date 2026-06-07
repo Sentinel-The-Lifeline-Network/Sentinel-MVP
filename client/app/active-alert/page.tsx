@@ -162,7 +162,7 @@ export default function ActiveAlertPage() {
             aria-live="assertive"
           >
             <div
-              className="glass-card rounded-2xl p-4"
+              className="sentinel-card rounded-2xl p-4"
               style={{
                 border: '1px solid #E7E0D7',
                 boxShadow: '0 12px 28px rgba(21,21,21,0.08)',
@@ -250,7 +250,7 @@ export default function ActiveAlertPage() {
               { label: 'Contacts', value: alert?.sync_status === 'pending' ? 'Queued' : 'Auto-sent', color: alert?.sync_status === 'pending' ? '#6B6B6B' : '#1F5A47', icon: 'SMS' },
               { label: 'Tracking', value: trackingUrl ? 'Live' : 'Pending', color: trackingUrl ? '#C53A2D' : '#6B6B6B', icon: 'LIVE' },
             ].map((s) => (
-              <div key={s.label} className="glass-card rounded-2xl p-3 text-center">
+              <div key={s.label} className="sentinel-card rounded-2xl p-3 text-center">
                 <div className="text-[10px] font-black mb-1" style={{ color: s.color }}>{s.icon}</div>
                 <p className="text-[9px] text-muted uppercase tracking-wider">{s.label}</p>
                 <p className="text-xs font-bold mt-0.5" style={{ color: s.color }}>{s.value}</p>
@@ -267,7 +267,7 @@ export default function ActiveAlertPage() {
               exit={{ opacity: 0, x: 12 }}
               transition={{ duration: 0.2 }}
             >
-              <div className="glass-card rounded-2xl p-4" role="status" aria-live="polite">
+              <div className="sentinel-card rounded-2xl p-4" role="status" aria-live="polite">
                 <div className="flex items-center gap-3">
                   <div
                     className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -288,13 +288,13 @@ export default function ActiveAlertPage() {
                 timestamp={alert?.last_location_timestamp}
               />
 
-              <div className="glass-card rounded-2xl p-4">
+              <div className="sentinel-card rounded-2xl p-4">
                 <h3 className="text-xs font-bold tracking-widest uppercase mb-4" style={{ color: '#151515' }}>Timeline</h3>
                 <EmergencyTimeline steps={timelineSteps} />
               </div>
 
               {trackingUrl && (
-                <div className="glass-card rounded-2xl p-4">
+                <div className="sentinel-card rounded-2xl p-4">
                   <p className="text-[10px] text-muted uppercase tracking-wider mb-2">Shareable Tracking Link</p>
                   <div
                     className="rounded-xl px-3 py-2 mb-2 font-mono text-xs truncate"

@@ -55,7 +55,7 @@ export default function PinConfirmModal({
 
           {/* Sheet */}
           <motion.div
-            className="relative w-full max-w-sm glass rounded-3xl p-6"
+            className="relative w-full max-w-sm sentinel-surface rounded-3xl p-6"
             initial={{ y: 60, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 60, opacity: 0 }}
@@ -75,11 +75,8 @@ export default function PinConfirmModal({
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
                 placeholder="Enter PIN"
-                className="w-full px-4 py-3 rounded-xl text-center text-xl tracking-widest font-mono outline-none"
+                className="sentinel-input w-full px-4 py-3 rounded-xl text-center text-xl tracking-widest font-mono outline-none"
                 style={{
-                  color: '#151515',
-                  background: '#F7F4EE',
-                  border: '1px solid #E7E0D7',
                   caretColor: confirmColor,
                 }}
               />

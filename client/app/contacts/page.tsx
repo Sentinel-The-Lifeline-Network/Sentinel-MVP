@@ -120,7 +120,7 @@ export default function ContactsPage() {
               style={{ background: '#FFFFFF', color: '#0B3D2E', border: '1px solid #E7E0D7' }}
             >
               {importing ? (
-                <div className="w-3 h-3 rounded-full border border-t-transparent border-accent-teal animate-spin" />
+                <div className="w-3 h-3 rounded-full border border-t-transparent border-primary animate-spin" />
               ) : (
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="11"/><line x1="20" y1="8" x2="20" y2="14"/></svg>
               )}
@@ -228,7 +228,7 @@ export default function ContactsPage() {
               onClick={() => setShowForm(false)}
             />
             <motion.div
-              className="relative w-full max-w-sm glass rounded-t-3xl lg:rounded-3xl p-5 pb-10 lg:pb-6"
+              className="relative w-full max-w-sm sentinel-surface rounded-t-3xl lg:rounded-3xl p-5 pb-10 lg:pb-6"
               style={{ maxHeight: '90dvh', overflowY: 'auto' }}
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
@@ -256,8 +256,7 @@ export default function ContactsPage() {
                       placeholder={field.placeholder}
                       value={(form as any)[field.key]}
                       onChange={(e) => setForm((f) => ({ ...f, [field.key]: e.target.value }))}
-                      className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                      style={{ background: '#F7F4EE', border: '1px solid #E7E0D7', caretColor: '#C53A2D', color: '#151515' }}
+                      className="sentinel-input w-full px-4 py-3 rounded-xl text-sm outline-none"
                     />
                   </div>
                 ))}
@@ -287,8 +286,7 @@ export default function ContactsPage() {
                     placeholder="Or type custom..."
                     value={form.relationship}
                     onChange={(e) => setForm((f) => ({ ...f, relationship: e.target.value }))}
-                    className="w-full px-4 py-2.5 rounded-xl text-sm outline-none"
-                    style={{ background: '#F7F4EE', border: '1px solid #E7E0D7', caretColor: '#C53A2D', color: '#151515' }}
+                    className="sentinel-input w-full px-4 py-2.5 rounded-xl text-sm outline-none"
                   />
                 </div>
 

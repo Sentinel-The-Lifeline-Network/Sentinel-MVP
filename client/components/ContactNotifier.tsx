@@ -54,7 +54,7 @@ export default function ContactNotifier({ contacts, trackingUrl, userName, alert
 
   if (enabledContacts.length === 0) {
     return (
-      <div className="glass-card rounded-2xl p-4 text-center">
+      <div className="sentinel-card rounded-2xl p-4 text-center">
         <p className="text-sm text-muted">No contacts set for notification.</p>
         <a href="/contacts" className="text-xs font-semibold mt-1 block" style={{ color: '#0B3D2E' }}>
           Add emergency contacts →
@@ -90,7 +90,7 @@ export default function ContactNotifier({ contacts, trackingUrl, userName, alert
         return (
           <motion.div
             key={contact.id}
-            className="glass-card rounded-2xl p-3"
+            className="sentinel-card rounded-2xl p-3"
             initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.08 }}

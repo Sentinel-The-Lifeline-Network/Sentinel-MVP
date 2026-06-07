@@ -8,11 +8,9 @@
   --card: #FFFFFF;
   --primary: #0B3D2E;
   --primary-light: #1F5A47;
-  --security-blue: #0B3D2E;
   --emergency-red: #C53A2D;
   --danger-soft: #EDE0DD;
   --success-green: #1F5A47;
-  --accent-teal: #0B3D2E;
   --muted: #6B6B6B;
   --border: #E7E0D7;
   --text: #151515;
@@ -127,21 +125,16 @@ select:-webkit-autofill {
 }
 
 @layer utilities {
-  .glass {
+  .sentinel-surface {
     background: var(--surface);
     border: 1px solid var(--border);
     box-shadow: 0 1px 2px rgba(21, 21, 21, 0.04);
   }
 
-  .glass-card {
+  .sentinel-card {
     background: var(--surface);
     border: 1px solid var(--border);
     box-shadow: 0 1px 2px rgba(21, 21, 21, 0.04);
-  }
-
-  .glass-dark {
-    background: var(--surface);
-    border: 1px solid var(--border);
   }
 
   .text-gradient {

@@ -24,7 +24,7 @@ export default function LocationCard({ latitude, longitude, timestamp, label = '
 
   return (
     <motion.div
-      className="glass-card rounded-2xl p-4"
+      className="sentinel-card rounded-2xl p-4"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -50,11 +50,11 @@ export default function LocationCard({ latitude, longitude, timestamp, label = '
       {hasLocation ? (
         <>
           <div className="grid grid-cols-2 gap-3 mb-3">
-            <div className="glass rounded-xl p-3">
+            <div className="sentinel-surface rounded-xl p-3">
               <p className="text-[10px] text-muted mb-1 tracking-wide">LATITUDE</p>
               <p className="text-sm font-mono font-semibold" style={{ color: '#151515' }}>{formatCoord(latitude)}</p>
             </div>
-            <div className="glass rounded-xl p-3">
+            <div className="sentinel-surface rounded-xl p-3">
               <p className="text-[10px] text-muted mb-1 tracking-wide">LONGITUDE</p>
               <p className="text-sm font-mono font-semibold" style={{ color: '#151515' }}>{formatCoord(longitude)}</p>
             </div>

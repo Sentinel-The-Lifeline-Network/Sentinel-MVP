@@ -50,7 +50,7 @@ export default function ResponderAlertPage({ params }: { params: { id: string } 
   if (loading) {
     return (
       <div className="min-h-dvh flex items-center justify-center" style={{ background: '#F7F4EE' }}>
-        <div className="w-10 h-10 rounded-full border-2 border-accent-teal border-t-transparent animate-spin" />
+        <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -111,7 +111,7 @@ export default function ResponderAlertPage({ params }: { params: { id: string } 
 
         {/* Contact info */}
         <motion.div
-          className="glass-card rounded-2xl p-4"
+          className="sentinel-card rounded-2xl p-4"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
@@ -146,7 +146,7 @@ export default function ResponderAlertPage({ params }: { params: { id: string } 
         </motion.div>
 
         {/* Timeline */}
-        <div className="glass-card rounded-2xl p-5">
+        <div className="sentinel-card rounded-2xl p-5">
           <h3 className="text-sm font-bold mb-4" style={{ color: '#151515' }}>Incident Timeline</h3>
           <EmergencyTimeline steps={timelineSteps} />
         </div>
