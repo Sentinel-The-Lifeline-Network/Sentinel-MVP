@@ -163,9 +163,6 @@
         </div>
 
         <div class="hero-visual reveal reveal-delay-1" aria-hidden="true">
-          <!-- Glow -->
-          <div class="phone-glow"></div>
-
           <!-- Phone Frame -->
           <div class="phone-frame">
             <div class="phone-notch"></div>
@@ -194,8 +191,6 @@
 
                 <div class="phone-sos-area">
                   <div class="phone-sos-wrapper">
-                    <div class="phone-pulse phone-pulse-1"></div>
-                    <div class="phone-pulse phone-pulse-2"></div>
                     <div class="phone-sos-btn">
                       <span class="phone-sos-text">SOS</span>
                       <span class="phone-tap-hint">TAP</span>
@@ -214,12 +209,12 @@
           </div>
 
           <!-- Floating cards -->
-          <div class="float-card float-card-top">
-            <div class="float-card-dot float-dot-green"></div>
+          <div class="phone-status-note">
+            <div class="phone-status-note-dot"></div>
             <span>Alert sent — 0.4s</span>
           </div>
-          <div class="float-card float-card-bottom">
-            <div class="float-card-dot float-dot-teal"></div>
+          <div class="phone-status-note">
+            <div class="phone-status-note-dot"></div>
             <span>3 contacts notified</span>
           </div>
         </div>
@@ -616,5 +611,20 @@
       </div>
     </div>
   </footer>
+  <script>
+    document.querySelectorAll('.faq-question').forEach((button) => {
+      button.addEventListener('click', () => {
+        const answer = document.getElementById(button.getAttribute('aria-controls'));
+        if (!answer) return;
+
+        const item = button.closest('.faq-item');
+        const isOpen = button.getAttribute('aria-expanded') === 'true';
+
+        button.setAttribute('aria-expanded', String(!isOpen));
+        answer.hidden = isOpen;
+        item?.classList.toggle('is-open', !isOpen);
+      });
+    });
+  </script>
 </body>
 </html>

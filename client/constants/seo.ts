@@ -1,7 +1,7 @@
 export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://sentinel-omega-ten.vercel.app';
 
 export const SEO = {
-  title: 'Sentinel - Fast Emergency Response & Safety Network',
+  title: 'Sentinel - The Lifeline Network',
   template: '%s | Sentinel',
   description:
     'Sentinel is a mobile-first emergency response platform that helps users send instant SOS alerts, share live location, notify trusted contacts, and connect with responders during emergencies.',

@@ -6,6 +6,16 @@ import EmergencyTimeline from '@/components/EmergencyTimeline';
 import StatusBadge from '@/components/StatusBadge';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
+const formatElapsedAgo = (totalSeconds: number) => {
+  const safeSeconds = Math.max(0, totalSeconds);
+  const hours = Math.floor(safeSeconds / 3600);
+  const minutes = Math.floor((safeSeconds % 3600) / 60);
+  const seconds = safeSeconds % 60;
+
+  if (hours > 0) return `${hours}h ${minutes}m ago`;
+  return `${minutes}m ${seconds}s ago`;
+};
+
 interface TrackingData {
   id: string;
   status: 'active' | 'resolved' | 'cancelled';
@@ -116,7 +126,7 @@ export default function TrackPage({ params }: { params: { token: string } }) {
           <StatusBadge status={data.status} />
           {data.status === 'active' && (
             <span className="text-xs text-muted">
-              {Math.floor(elapsed / 60)}m {elapsed % 60}s ago
+              {formatElapsedAgo(elapsed)}
             </span>
           )}
         </div>

@@ -91,14 +91,6 @@ body {
   .safe-top { padding-top: env(safe-area-inset-top); }
   .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 
-  .sentinel-glow {
-    box-shadow: 0 12px 30px rgba(197, 58, 45, 0.16);
-  }
-
-  .teal-glow {
-    box-shadow: 0 10px 24px rgba(11, 61, 46, 0.12);
-  }
-
   .mesh-bg {
     background: var(--background);
   }

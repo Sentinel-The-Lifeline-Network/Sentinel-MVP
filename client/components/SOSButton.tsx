@@ -18,7 +18,7 @@ export default function SOSButton({ state, onPress }: SOSButtonProps) {
     : 'Ready to trigger SOS';
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: 288, height: 288 }}>
+    <div className="relative flex items-center justify-center" style={{ width: 348, height: 348, maxWidth: '90vw', maxHeight: '90vw' }}>
       <p id="sos-status" className="sr-only" aria-live="assertive">
         {statusText}
       </p>
@@ -26,8 +26,8 @@ export default function SOSButton({ state, onPress }: SOSButtonProps) {
       <div
         className="absolute rounded-full"
         style={{
-          width: 252,
-          height: 252,
+          width: 'min(292px, 80vw)',
+          height: 'min(292px, 80vw)',
           border: isActive ? '3px solid #C53A2D' : '1px solid #E7E0D7',
           background: '#FFFFFF',
           transition: 'all 0.25s ease',
@@ -39,12 +39,21 @@ export default function SOSButton({ state, onPress }: SOSButtonProps) {
         disabled={!isIdle}
         className="relative z-10 rounded-full flex items-center justify-center select-none focus-visible:ring-4 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
         style={{
-          width: 224,
-          height: 224,
+          width: 'min(256px, 72vw)',
+          height: 'min(256px, 72vw)',
           background: isActive ? '#9F2E24' : '#C53A2D',
-          boxShadow: '0 18px 36px rgba(197, 58, 45, 0.24)',
+          border: '8px solid #FFFFFF',
           cursor: isIdle ? 'pointer' : 'default',
         }}
+        whileHover={
+          isIdle
+            ? {
+                scale: 1.06,
+                y: -4,
+                boxShadow: '0 20px 34px rgba(21, 21, 21, 0.18)',
+              }
+            : undefined
+        }
         whileTap={isIdle ? { scale: 0.96 } : undefined}
         animate={isActivating ? { scale: [1, 1.015, 1] } : { scale: 1 }}
         transition={isActivating ? { duration: 0.9, repeat: Infinity } : { type: 'spring', stiffness: 360, damping: 24 }}
@@ -55,7 +64,7 @@ export default function SOSButton({ state, onPress }: SOSButtonProps) {
         <div className="flex flex-col items-center gap-2">
           <span
             className="font-heading font-black text-white select-none"
-            style={{ fontSize: 56, lineHeight: 1, letterSpacing: '0.03em' }}
+            style={{ fontSize: 'clamp(56px, 16vw, 68px)', lineHeight: 1, letterSpacing: '0.03em' }}
           >
             SOS
           </span>

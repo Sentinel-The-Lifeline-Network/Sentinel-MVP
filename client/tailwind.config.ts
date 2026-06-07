@@ -33,8 +33,6 @@ const config: Config = {
         'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
       },
       boxShadow: {
-        'sos-glow': '0 18px 36px rgba(197, 58, 45, 0.22)',
-        'sos-glow-active': '0 18px 36px rgba(197, 58, 45, 0.26)',
         glass: '0 1px 2px rgba(21, 21, 21, 0.04)',
       },
     },
