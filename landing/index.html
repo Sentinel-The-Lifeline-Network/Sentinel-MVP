@@ -469,12 +469,12 @@
 
         <div class="faq-list" role="list">
 
-          <div class="faq-item reveal" data-delay="0" role="listitem">
-            <button class="faq-question" aria-expanded="false" aria-controls="faq-1">
+          <div class="faq-item reveal is-open" data-delay="0" role="listitem">
+            <button class="faq-question" aria-expanded="true" aria-controls="faq-1">
               <span>What is Sentinel?</span>
               <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
-            <div class="faq-answer" id="faq-1" role="region" hidden>
+            <div class="faq-answer" id="faq-1" role="region">
               <p>Sentinel is a mobile-first emergency response platform. It allows anyone to trigger an instant SOS alert with one tap, automatically capture and share their live GPS location, and notify trusted emergency contacts through SMS and email.</p>
             </div>
           </div>
@@ -535,7 +535,7 @@
               <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="faq-answer" id="faq-7" role="region" hidden>
-              <p>Sentinel is a Progressive Web App (PWA). This means it runs in any modern browser — Safari on iPhone, Chrome on Android — with no app store download required. From your browser, you can add it to your home screen with one tap and it behaves exactly like a native app: offline capabilities, push notifications, and full-screen experience. This makes distribution and adoption significantly faster, especially in community deployments.</p>
+              <p>Sentinel is currently a Progressive Web App (PWA), so it runs in any modern browser and can be added to a phone home screen without an app store download. A dedicated mobile app is planned soon, while the PWA keeps Sentinel easy to access and deploy today.</p>
             </div>
           </div>
 
@@ -612,7 +612,9 @@
     </div>
   </footer>
   <script>
-    document.querySelectorAll('.faq-question').forEach((button) => {
+    const faqButtons = document.querySelectorAll('.faq-question');
+
+    faqButtons.forEach((button) => {
       button.addEventListener('click', () => {
         const answer = document.getElementById(button.getAttribute('aria-controls'));
         if (!answer) return;
@@ -620,9 +622,18 @@
         const item = button.closest('.faq-item');
         const isOpen = button.getAttribute('aria-expanded') === 'true';
 
-        button.setAttribute('aria-expanded', String(!isOpen));
-        answer.hidden = isOpen;
-        item?.classList.toggle('is-open', !isOpen);
+        faqButtons.forEach((otherButton) => {
+          const otherAnswer = document.getElementById(otherButton.getAttribute('aria-controls'));
+          otherButton.setAttribute('aria-expanded', 'false');
+          if (otherAnswer) otherAnswer.hidden = true;
+          otherButton.closest('.faq-item')?.classList.remove('is-open');
+        });
+
+        if (isOpen) return;
+
+        button.setAttribute('aria-expanded', 'true');
+        answer.hidden = false;
+        item?.classList.add('is-open');
       });
     });
   </script>
