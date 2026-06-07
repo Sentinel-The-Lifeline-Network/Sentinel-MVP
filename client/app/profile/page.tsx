@@ -92,8 +92,7 @@ export default function ProfilePage() {
                 placeholder={field.placeholder}
                 value={(form as any)[field.key]}
                 onChange={(e) => setForm((f) => ({ ...f, [field.key]: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                style={{ background: '#F7F4EE', border: '1px solid #E7E0D7', caretColor: '#C53A2D', color: '#151515' }}
+                className="sentinel-input w-full px-4 py-3 rounded-xl text-sm outline-none"
               />
             </div>
           ))}
@@ -126,8 +125,7 @@ export default function ProfilePage() {
                 placeholder={field.placeholder}
                 value={(form as any)[field.key]}
                 onChange={(e) => setForm((f) => ({ ...f, [field.key]: e.target.value.replace(/\D/g, '') }))}
-                className="w-full px-4 py-3 rounded-xl text-center text-2xl font-mono tracking-[0.4em] outline-none"
-                style={{ background: '#F7F4EE', border: '1px solid #E7E0D7', caretColor: '#C53A2D', color: '#151515' }}
+                className="sentinel-input w-full px-4 py-3 rounded-xl text-center text-2xl font-mono tracking-[0.4em] outline-none"
               />
             </div>
           ))}

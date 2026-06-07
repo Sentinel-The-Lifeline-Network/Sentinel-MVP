@@ -76,6 +76,28 @@ select:-webkit-autofill {
   transition: background-color 9999s ease-in-out 0s;
 }
 
+.sentinel-input {
+  background-color: #FFFFFF !important;
+  color: #151515 !important;
+  border: 1px solid #E7E0D7 !important;
+  caret-color: #C53A2D !important;
+  -webkit-text-fill-color: #151515 !important;
+  box-shadow: 0 1px 0 rgba(21, 21, 21, 0.02) !important;
+}
+
+.sentinel-input:focus {
+  background-color: #FFFFFF !important;
+  border-color: #0B3D2E !important;
+  box-shadow: 0 0 0 3px rgba(11, 61, 46, 0.12) !important;
+}
+
+.sentinel-input:-webkit-autofill,
+.sentinel-input:-webkit-autofill:hover,
+.sentinel-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #151515 !important;
+  box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+}
+
 :focus-visible {
   outline: 3px solid var(--primary);
   outline-offset: 4px;
