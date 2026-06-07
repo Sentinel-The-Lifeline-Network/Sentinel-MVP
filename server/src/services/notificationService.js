@@ -70,6 +70,7 @@ const sendSms = async (contact, message) => {
     hasApiKey: Boolean(notificationConfig.africasTalkingApiKey),
     username: notificationConfig.africasTalkingUsername,
     hasSenderId: Boolean(notificationConfig.africasTalkingSenderId),
+    apiKeyLength: notificationConfig.africasTalkingApiKey?.length || 0,
   });
 
   if (!normalizedPhone) {
@@ -84,6 +85,15 @@ const sendSms = async (contact, message) => {
     return { status: 'sent', provider: 'development-log' };
   }
 
+  // Clean and validate API key
+  const cleanApiKey = notificationConfig.africasTalkingApiKey.trim();
+  
+  log('API Key Debug', {
+    keyLength: cleanApiKey.length,
+    startsWithAtsk: cleanApiKey.startsWith('atsk_'),
+    firstChars: cleanApiKey.substring(0, 10),
+  });
+
   const payload = new URLSearchParams({
     username: notificationConfig.africasTalkingUsername,
     to: recipient,
@@ -97,7 +107,7 @@ const sendSms = async (contact, message) => {
   const res = await fetch('https://api.africastalking.com/version1/messaging', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${notificationConfig.africasTalkingApiKey}`,
+      'Authorization': `Bearer ${cleanApiKey}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: payload.toString(),
