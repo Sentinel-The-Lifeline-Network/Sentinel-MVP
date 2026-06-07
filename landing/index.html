@@ -612,28 +612,85 @@
     </div>
   </footer>
   <script>
+    document.documentElement.classList.add('js');
+
+    const revealItems = document.querySelectorAll('.reveal');
+    revealItems.forEach((item) => {
+      const delay = item.getAttribute('data-delay');
+      if (delay) item.style.setProperty('--reveal-delay', delay);
+    });
+
+    if ('IntersectionObserver' in window) {
+      const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        });
+      }, { threshold: 0.14, rootMargin: '0px 0px -40px 0px' });
+
+      revealItems.forEach((item) => revealObserver.observe(item));
+    } else {
+      revealItems.forEach((item) => item.classList.add('is-visible'));
+    }
+
     const faqButtons = document.querySelectorAll('.faq-question');
+
+    const closeAnswer = (button) => {
+      const answer = document.getElementById(button.getAttribute('aria-controls'));
+      if (!answer || answer.hidden) return;
+
+      const item = button.closest('.faq-item');
+      button.setAttribute('aria-expanded', 'false');
+      answer.setAttribute('aria-hidden', 'true');
+      item?.classList.remove('is-open');
+      answer.style.height = `${answer.scrollHeight}px`;
+      answer.offsetHeight;
+      answer.style.height = '0px';
+      answer.addEventListener('transitionend', () => {
+        if (button.getAttribute('aria-expanded') === 'false') answer.hidden = true;
+      }, { once: true });
+    };
+
+    const openAnswer = (button) => {
+      const answer = document.getElementById(button.getAttribute('aria-controls'));
+      if (!answer) return;
+
+      const item = button.closest('.faq-item');
+      button.setAttribute('aria-expanded', 'true');
+      answer.setAttribute('aria-hidden', 'false');
+      item?.classList.add('is-open');
+      answer.hidden = false;
+      answer.style.height = '0px';
+      answer.offsetHeight;
+      answer.style.height = `${answer.scrollHeight}px`;
+      answer.addEventListener('transitionend', () => {
+        if (button.getAttribute('aria-expanded') === 'true') answer.style.height = 'auto';
+      }, { once: true });
+    };
+
+    faqButtons.forEach((button) => {
+      const answer = document.getElementById(button.getAttribute('aria-controls'));
+      if (!answer) return;
+      const isOpen = button.getAttribute('aria-expanded') === 'true';
+      answer.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+      if (!isOpen) answer.hidden = false;
+      answer.style.height = isOpen ? 'auto' : '0px';
+    });
 
     faqButtons.forEach((button) => {
       button.addEventListener('click', () => {
-        const answer = document.getElementById(button.getAttribute('aria-controls'));
-        if (!answer) return;
-
-        const item = button.closest('.faq-item');
         const isOpen = button.getAttribute('aria-expanded') === 'true';
 
         faqButtons.forEach((otherButton) => {
-          const otherAnswer = document.getElementById(otherButton.getAttribute('aria-controls'));
-          otherButton.setAttribute('aria-expanded', 'false');
-          if (otherAnswer) otherAnswer.hidden = true;
-          otherButton.closest('.faq-item')?.classList.remove('is-open');
+          if (otherButton !== button) closeAnswer(otherButton);
         });
 
-        if (isOpen) return;
-
-        button.setAttribute('aria-expanded', 'true');
-        answer.hidden = false;
-        item?.classList.add('is-open');
+        if (isOpen) {
+          closeAnswer(button);
+        } else {
+          openAnswer(button);
+        }
       });
     });
   </script>

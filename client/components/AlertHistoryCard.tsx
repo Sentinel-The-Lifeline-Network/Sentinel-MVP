@@ -12,8 +12,11 @@ interface AlertHistoryCardProps {
 const formatDuration = (start: string, end: string | null) => {
   if (!end) return 'Ongoing';
   const ms = new Date(end).getTime() - new Date(start).getTime();
-  const mins = Math.floor(ms / 60000);
+  const totalMins = Math.floor(ms / 60000);
+  const hours = Math.floor(totalMins / 60);
+  const mins = totalMins % 60;
   const secs = Math.floor((ms % 60000) / 1000);
+  if (hours > 0) return `${hours}h ${mins}m`;
   return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
 };
 
@@ -25,11 +28,12 @@ export default function AlertHistoryCard({ alert, index }: AlertHistoryCardProps
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -2 }}
       transition={{ delay: index * 0.08, duration: 0.35 }}
     >
       <Link
         href={`/history/${alert.id}`}
-        className="block sentinel-card rounded-2xl p-4 active:scale-[0.98] transition-transform"
+        className="block sentinel-card sentinel-card-interactive rounded-2xl p-4 active:scale-[0.98] transition-transform"
       >
         <div className="flex items-start justify-between mb-2">
           <div>

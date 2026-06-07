@@ -26,8 +26,9 @@ export default function ContactCard({ contact, index, onToggle, onDelete, onEdit
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20 }}
+      whileHover={{ y: -2 }}
       transition={{ delay: index * 0.07, duration: 0.35 }}
-      className="sentinel-card rounded-2xl p-4"
+      className="sentinel-card sentinel-card-interactive rounded-2xl p-4"
     >
       <div className="flex items-center gap-3">
         {/* Avatar */}
@@ -66,6 +67,8 @@ export default function ContactCard({ contact, index, onToggle, onDelete, onEdit
           onClick={() => setShowActions(!showActions)}
           className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
           style={{ background: '#F7F4EE' }}
+          aria-expanded={showActions}
+          aria-label={showActions ? 'Hide contact actions' : 'Show contact actions'}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round">
             <circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" />
