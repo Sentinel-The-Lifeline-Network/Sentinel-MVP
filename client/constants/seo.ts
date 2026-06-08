@@ -4,7 +4,7 @@ export const SEO = {
   title: 'Sentinel - The Lifeline Network',
   template: '%s | Sentinel',
   description:
-    'Sentinel is a mobile-first emergency response platform that helps users send instant SOS alerts, share live location, notify trusted contacts, and connect with responders during emergencies.',
+    'Sentinel is a mobile-first emergency response platform that helps users send instant SOS alerts, share live location, and notify trusted contacts during emergencies.',
   keywords: [
     'emergency response app',
     'SOS alert app',

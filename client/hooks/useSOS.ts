@@ -39,7 +39,7 @@ export const useSOS = () => {
       if (synced[0]) {
         setAlert(synced[0]);
         setState('active');
-        setSyncStatus('SOS synced successfully. Responders can now see the alert.');
+        setSyncStatus('SOS synced successfully. Your trusted contacts can now follow the alert.');
       }
     } catch {
       setSyncStatus('SOS saved locally. Syncing when network returns.');

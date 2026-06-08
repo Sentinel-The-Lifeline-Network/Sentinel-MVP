@@ -38,9 +38,10 @@ module.exports = {
   },
   notifications: {
     repeatIntervalMs: parseInteger(process.env.NOTIFICATION_REPEAT_INTERVAL_MS, 5 * 60 * 1000),
-    africasTalkingApiKey: cleanEnv(process.env.AFRICAS_TALKING_API_KEY),
-    africasTalkingUsername: cleanEnv(process.env.AFRICAS_TALKING_USERNAME) || 'sandbox',
-    africasTalkingSenderId: cleanEnv(process.env.AFRICAS_TALKING_SENDER_ID),
+    twilioAccountSid: cleanEnv(process.env.TWILIO_ACCOUNT_SID),
+    twilioAuthToken: cleanEnv(process.env.TWILIO_AUTH_TOKEN),
+    twilioSmsFrom: cleanEnv(process.env.TWILIO_SMS_FROM),
+    twilioWhatsappFrom: cleanEnv(process.env.TWILIO_WHATSAPP_FROM),
     gmailUser: cleanEnv(process.env.GMAIL_USER),
     gmailAppPassword: cleanEnv(process.env.GMAIL_APP_PASSWORD),
     emailFrom,

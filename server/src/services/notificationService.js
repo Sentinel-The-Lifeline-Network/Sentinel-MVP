@@ -5,6 +5,17 @@ const nodemailer = require('nodemailer');
 const activeNotificationJobs = new Map();
 let mailTransporter;
 
+const twilioMessagesUrl = () =>
+  `https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(notificationConfig.twilioAccountSid)}/Messages.json`;
+
+const twilioAuthHeader = () =>
+  `Basic ${Buffer.from(`${notificationConfig.twilioAccountSid}:${notificationConfig.twilioAuthToken}`).toString('base64')}`;
+
+const whatsappAddressFor = (phone) => {
+  if (!phone) return '';
+  return phone.startsWith('whatsapp:') ? phone : `whatsapp:${phone}`;
+};
+
 const log = (...args) => {
   if (nodeEnv !== 'test') console.log('[Notification]', ...args);
 };
@@ -59,80 +70,99 @@ const normalizePhoneNumber = (phone) => {
   return digits;
 };
 
-const sendSms = async (contact, message) => {
-  const normalizedPhone = normalizePhoneNumber(contact.phone);
-  const recipient = normalizedPhone ? `+${normalizedPhone}` : '';
-
-  log('SMS send attempt', {
-    contactId: contact.id,
-    phoneLast4: normalizedPhone.slice(-4),
-    normalizedPhoneLength: normalizedPhone.length,
-    hasApiKey: Boolean(notificationConfig.africasTalkingApiKey),
-    username: notificationConfig.africasTalkingUsername,
-    hasSenderId: Boolean(notificationConfig.africasTalkingSenderId),
-    apiKeyLength: notificationConfig.africasTalkingApiKey?.length || 0,
-  });
-
-  if (!normalizedPhone) {
-    throw new Error(`SMS phone number is empty or invalid for contact ${contact.id}`);
-  }
-
-  if (!notificationConfig.africasTalkingApiKey || !notificationConfig.africasTalkingUsername) {
-    if (nodeEnv === 'production') {
-      throw new Error('Africa\'s Talking credentials are missing. Set AFRICAS_TALKING_API_KEY and AFRICAS_TALKING_USERNAME.');
-    }
-    log(`SMS fallback to ${contact.phone}: ${message}`);
-    return { status: 'sent', provider: 'development-log' };
-  }
-
-  // Clean and validate API key
-  const cleanApiKey = notificationConfig.africasTalkingApiKey.trim();
-  
-  log('API Key Debug', {
-    keyLength: cleanApiKey.length,
-    startsWithAtsk: cleanApiKey.startsWith('atsk_'),
-    firstChars: cleanApiKey.substring(0, 10),
-  });
-
+const sendTwilioMessage = async ({ to, from, body, channel }) => {
   const payload = new URLSearchParams({
-    username: notificationConfig.africasTalkingUsername,
-    to: recipient,
-    message,
+    To: to,
+    From: from,
+    Body: body,
   });
 
-  if (notificationConfig.africasTalkingSenderId) {
-    payload.set('from', notificationConfig.africasTalkingSenderId);
-  }
-
-  const res = await fetch('https://api.africastalking.com/version1/messaging', {
+  const res = await fetch(twilioMessagesUrl(), {
     method: 'POST',
     headers: {
-      apiKey: cleanApiKey,
+      Authorization: twilioAuthHeader(),
       'Content-Type': 'application/x-www-form-urlencoded',
-      Accept: 'application/json',
     },
     body: payload.toString(),
   });
 
-  const body = await res.text();
-  if (!res.ok) throw new Error(`SMS delivery failed with ${res.status}: ${body}`);
+  const responseBody = await res.text();
+  if (!res.ok) {
+    throw new Error(`${channel} delivery failed with ${res.status}: ${responseBody}`);
+  }
 
-  const parsedBody = JSON.parse(body || '{}');
-  const recipients = parsedBody?.SMSMessageData?.Recipients;
-  if (Array.isArray(recipients) && recipients.length > 0) {
-    const failedRecipients = recipients.filter((recipient) => !/success|sent/i.test(String(recipient.status || '')));
-    if (failedRecipients.length > 0) {
-      throw new Error(`SMS provider accepted request but recipient delivery failed: ${JSON.stringify(failedRecipients)}`);
+  const parsedBody = JSON.parse(responseBody || '{}');
+  return {
+    status: 'sent',
+    provider: 'twilio',
+    channel,
+    sid: parsedBody.sid,
+  };
+};
+
+const sendPhoneNotification = async (contact, message) => {
+  const normalizedPhone = normalizePhoneNumber(contact.phone);
+  const recipient = normalizedPhone ? `+${normalizedPhone}` : '';
+
+  log('Phone notification attempt', {
+    contactId: contact.id,
+    phoneLast4: normalizedPhone.slice(-4),
+    normalizedPhoneLength: normalizedPhone.length,
+    hasAccountSid: Boolean(notificationConfig.twilioAccountSid),
+    hasAuthToken: Boolean(notificationConfig.twilioAuthToken),
+    hasWhatsappFrom: Boolean(notificationConfig.twilioWhatsappFrom),
+    hasSmsFrom: Boolean(notificationConfig.twilioSmsFrom),
+  });
+
+  if (!normalizedPhone) {
+    throw new Error(`Phone number is empty or invalid for contact ${contact.id}`);
+  }
+
+  if (!notificationConfig.twilioAccountSid || !notificationConfig.twilioAuthToken || !notificationConfig.twilioSmsFrom) {
+    if (nodeEnv === 'production') {
+      throw new Error('Twilio credentials are missing. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_SMS_FROM.');
+    }
+    log(`Phone notification fallback to ${contact.phone}: ${message}`);
+    return { status: 'sent', provider: 'development-log', channel: 'sms' };
+  }
+
+  if (notificationConfig.twilioWhatsappFrom) {
+    try {
+      const whatsappResult = await sendTwilioMessage({
+        to: `whatsapp:${recipient}`,
+        from: whatsappAddressFor(notificationConfig.twilioWhatsappFrom),
+        body: message,
+        channel: 'whatsapp',
+      });
+
+      log('WhatsApp send success', {
+        contactId: contact.id,
+        phoneLast4: normalizedPhone.slice(-4),
+        sid: whatsappResult.sid,
+      });
+      return whatsappResult;
+    } catch (err) {
+      logError('WhatsApp failed. Falling back to SMS:', {
+        contactId: contact.id,
+        phoneLast4: normalizedPhone.slice(-4),
+        message: err.message,
+      });
     }
   }
+
+  const smsResult = await sendTwilioMessage({
+    to: recipient,
+    from: notificationConfig.twilioSmsFrom,
+    body: message,
+    channel: 'sms',
+  });
 
   log('SMS send success', {
     contactId: contact.id,
     phoneLast4: normalizedPhone.slice(-4),
-    status: res.status,
-    providerResponse: body,
+    sid: smsResult.sid,
   });
-  return { status: 'sent', provider: 'africas-talking' };
+  return smsResult;
 };
 
 const getMailTransporter = () => {
@@ -212,7 +242,7 @@ const summarizeDeliveryResults = (contacts, results) => ({
 const deliverToContact = async ({ alert, contact, subject, message }) => {
   const deliveries = [];
 
-  if (contact.phone) deliveries.push(['sms', () => sendSms(contact, message)]);
+  if (contact.phone) deliveries.push(['sms', () => sendPhoneNotification(contact, message)]);
   if (contact.email) deliveries.push(['email', () => sendEmail(contact, subject, message)]);
 
   log('Delivering to contact', {
@@ -226,13 +256,14 @@ const deliverToContact = async ({ alert, contact, subject, message }) => {
   return Promise.all(
     deliveries.map(async ([channel, send]) => {
       try {
-        await send();
-        await logNotification({ alertId: alert.id, contactId: contact.id, channel, status: 'sent' });
-        log('Delivery logged as sent', { alertId: alert.id, contactId: contact.id, channel });
+        const result = await send();
+        const deliveredChannel = result?.channel || channel;
+        await logNotification({ alertId: alert.id, contactId: contact.id, channel: deliveredChannel, status: 'sent' });
+        log('Delivery logged as sent', { alertId: alert.id, contactId: contact.id, channel: deliveredChannel });
         return {
           contactId: contact.id,
           contactName: contact.full_name,
-          channel,
+          channel: deliveredChannel,
           status: 'sent',
         };
       } catch (err) {
@@ -296,7 +327,8 @@ const startRecurringEmergencyNotifications = async (alert, contacts, options = {
     sendImmediately,
     waitForImmediate,
     repeatIntervalMs: notificationConfig.repeatIntervalMs,
-    hasSmsConfig: Boolean(notificationConfig.africasTalkingApiKey && notificationConfig.africasTalkingUsername),
+    hasPhoneConfig: Boolean(notificationConfig.twilioAccountSid && notificationConfig.twilioAuthToken && notificationConfig.twilioSmsFrom),
+    hasWhatsappConfig: Boolean(notificationConfig.twilioWhatsappFrom),
     hasEmailConfig: Boolean(notificationConfig.gmailUser && notificationConfig.gmailAppPassword),
   });
 
@@ -435,6 +467,7 @@ module.exports = {
   _private: {
     enabledContacts,
     normalizePhoneNumber,
-    sendSms,
+    sendPhoneNotification,
+    sendTwilioMessage,
   },
 };

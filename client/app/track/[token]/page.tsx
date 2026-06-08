@@ -174,7 +174,7 @@ export default function TrackPage({ params }: { params: { token: string } }) {
           <ul className="text-sm text-muted space-y-1.5">
             <li>• Call the person directly if you can reach them</li>
             <li>• Contact emergency services (911) if needed</li>
-            <li>• Share this link with other responders</li>
+            <li>• Share this link with trusted people who can help</li>
             <li>• This page auto-refreshes while the alert is active</li>
           </ul>
         </div>

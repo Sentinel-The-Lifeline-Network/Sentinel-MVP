@@ -42,7 +42,6 @@ app.get('/health', (req, res) => res.json({ status: 'ok', service: 'sentinel-api
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/contacts', require('./routes/contacts'));
 app.use('/api/sos', require('./routes/sos'));
-app.use('/api/responder', require('./routes/responder'));
 app.use('/api/tracking', require('./routes/tracking'));
 
 app.use(notFound);

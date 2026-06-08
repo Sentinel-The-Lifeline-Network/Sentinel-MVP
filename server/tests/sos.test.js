@@ -18,10 +18,6 @@ jest.mock('../src/middleware/auth', () => ({
     req.user = { id: 'test-user-id', email: 'test@example.com' };
     next();
   },
-  authenticateResponder: (req, res, next) => {
-    req.user = { id: 'responder-id', email: 'responder@example.com' };
-    next();
-  },
 }));
 
 jest.mock('../src/middleware/rateLimiter', () => ({

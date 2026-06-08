@@ -41,7 +41,7 @@ export default function ContactsPage() {
 
   const handleSave = async () => {
     if (!form.full_name.trim() || !form.phone.trim() || !form.email.trim() || !form.relationship.trim()) {
-      setFormError('Name, SMS-capable phone number, working email, and relationship are required.');
+      setFormError('Name, WhatsApp/SMS-capable phone number, working email, and relationship are required.');
       return;
     }
     if (!/^\S+@\S+\.\S+$/.test(form.email.trim())) {
@@ -240,7 +240,7 @@ export default function ContactsPage() {
                 {editingContact ? 'Edit Contact' : 'New Contact'}
               </h3>
               <p className="text-xs text-muted leading-relaxed mb-5">
-                Use an SMS-capable phone number and a working email. Sentinel sends SOS alerts automatically through both channels and repeats them every 5 minutes until you mark safe or cancel.
+                Use a WhatsApp/SMS-capable phone number and a working email. Sentinel tries WhatsApp first, falls back to SMS when needed, and repeats alerts every 5 minutes until you mark safe or cancel.
               </p>
 
               <div className="space-y-4">
@@ -294,7 +294,7 @@ export default function ContactsPage() {
                 <div className="flex items-center justify-between py-1">
                   <div>
                     <p className="text-sm font-semibold" style={{ color: '#151515' }}>Alert on SOS</p>
-                    <p className="text-xs text-muted">Automatically message this contact by SMS and email</p>
+                    <p className="text-xs text-muted">Automatically message this contact by WhatsApp/SMS and email</p>
                   </div>
                   <button
                     onClick={() => setForm((f) => ({ ...f, notification_enabled: !f.notification_enabled }))}

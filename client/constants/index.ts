@@ -25,6 +25,4 @@ export const ROUTES = {
   history: '/history',
   profile: '/profile',
   track: (token: string) => `/track/${token}`,
-  responder: '/responder',
-  responderAlert: (id: string) => `/responder/alerts/${id}`,
 } as const;

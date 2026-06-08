@@ -18,19 +18,4 @@ const authenticate = async (req, res, next) => {
   next();
 };
 
-const authenticateResponder = async (req, res, next) => {
-  await authenticate(req, res, async () => {
-    const { data: profile } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', req.user.id)
-      .single();
-
-    if (!profile || profile.role !== 'responder') {
-      return error(res, 'Responder access required', 403);
-    }
-    next();
-  });
-};
-
-module.exports = { authenticate, authenticateResponder };
+module.exports = { authenticate };

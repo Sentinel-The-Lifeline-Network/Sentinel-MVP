@@ -77,8 +77,6 @@ cd client && npm test
 | `/history` | Past alert history |
 | `/profile` | User profile & security PIN |
 | `/track/[token]` | Public live tracking page |
-| `/responder` | Responder operations dashboard |
-| `/responder/alerts/[id]` | Responder incident details |
 | `/offline` | Offline fallback page |
 
 ## API Routes
@@ -98,16 +96,11 @@ cd client && npm test
 | POST | `/api/sos/:id/mark-safe` | Mark safe (PIN verified) |
 | POST | `/api/sos/:id/stop` | Stop alert (PIN verified) |
 | GET | `/api/sos/history` | Alert history |
-| GET | `/api/responder/alerts` | All active alerts (responder) |
-| GET | `/api/responder/alerts/:id` | Alert details (responder) |
-| POST | `/api/responder/alerts/:id/resolve` | Resolve incident |
 | GET | `/api/tracking/:token` | Public tracking data |
 
 ## Future Extensions
 
-- SMS/WhatsApp contact alerts (Twilio/Africa's Talking)
 - Push notifications (Web Push API)
 - Hardware SOS device integration
-- Community responder network
 - Offline emergency infrastructure
 - School / estate / NYSC dashboard

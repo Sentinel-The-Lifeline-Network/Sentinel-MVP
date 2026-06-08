@@ -45,7 +45,7 @@ const navItems = [
 export default function BottomNav() {
   const pathname = usePathname();
 
-  const hideOn = ['/active-alert', '/track', '/responder'];
+  const hideOn = ['/active-alert', '/track'];
   if (hideOn.some((p) => pathname.startsWith(p))) return null;
 
   return (

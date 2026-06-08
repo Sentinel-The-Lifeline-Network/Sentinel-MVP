@@ -7,9 +7,10 @@ jest.mock('../src/config', () => ({
   nodeEnv: 'test',
   notifications: {
     repeatIntervalMs: 5 * 60 * 1000,
-    africasTalkingApiKey: undefined,
-    africasTalkingUsername: 'sandbox',
-    africasTalkingSenderId: undefined,
+    twilioAccountSid: undefined,
+    twilioAuthToken: undefined,
+    twilioSmsFrom: undefined,
+    twilioWhatsappFrom: undefined,
     gmailUser: undefined,
     gmailAppPassword: undefined,
     emailFrom: 'Sentinel <alerts@example.com>',
@@ -98,14 +99,17 @@ describe('notificationService', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
-    delete process.env.AFRICAS_TALKING_API_KEY;
-    delete process.env.AFRICAS_TALKING_USERNAME;
+    delete process.env.TWILIO_ACCOUNT_SID;
+    delete process.env.TWILIO_AUTH_TOKEN;
+    delete process.env.TWILIO_SMS_FROM;
+    delete process.env.TWILIO_WHATSAPP_FROM;
     delete process.env.GMAIL_USER;
     delete process.env.GMAIL_APP_PASSWORD;
     delete global.fetch;
-    config.notifications.africasTalkingApiKey = undefined;
-    config.notifications.africasTalkingUsername = 'sandbox';
-    config.notifications.africasTalkingSenderId = undefined;
+    config.notifications.twilioAccountSid = undefined;
+    config.notifications.twilioAuthToken = undefined;
+    config.notifications.twilioSmsFrom = undefined;
+    config.notifications.twilioWhatsappFrom = undefined;
   });
 
   afterEach(() => {
@@ -132,39 +136,62 @@ describe('notificationService', () => {
     expect(_private.normalizePhoneNumber('002348011111111')).toBe('2348011111111');
   });
 
-  it('sends Africa\'s Talking SMS with apiKey authorization and form body', async () => {
-    config.notifications.africasTalkingApiKey = ' test-api-key ';
-    config.notifications.africasTalkingUsername = 'sandbox';
-    config.notifications.africasTalkingSenderId = 'Sentinel';
+  it('sends Twilio WhatsApp first for phone notifications', async () => {
+    config.notifications.twilioAccountSid = 'AC123';
+    config.notifications.twilioAuthToken = 'auth-token';
+    config.notifications.twilioSmsFrom = '+15551230000';
+    config.notifications.twilioWhatsappFrom = 'whatsapp:+14155238886';
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
-      text: jest.fn().mockResolvedValue(JSON.stringify({
-        SMSMessageData: {
-          Recipients: [{ status: 'Success', number: '+2348011111111' }],
-        },
-      })),
+      text: jest.fn().mockResolvedValue(JSON.stringify({ sid: 'SMwhatsapp' })),
     });
 
-    await _private.sendSms({ id: 'contact-sms', phone: '08011111111' }, 'Help is needed');
+    const result = await _private.sendPhoneNotification({ id: 'contact-sms', phone: '08011111111' }, 'Help is needed');
 
     expect(global.fetch).toHaveBeenCalledWith(
-      'https://api.africastalking.com/version1/messaging',
+      'https://api.twilio.com/2010-04-01/Accounts/AC123/Messages.json',
       expect.objectContaining({
         method: 'POST',
-        headers: {
-          apiKey: 'test-api-key',
+        headers: expect.objectContaining({
+          Authorization: expect.stringMatching(/^Basic /),
           'Content-Type': 'application/x-www-form-urlencoded',
-          Accept: 'application/json',
-        },
+        }),
       })
     );
 
     const requestBody = global.fetch.mock.calls[0][1].body;
-    expect(requestBody).toContain('username=sandbox');
-    expect(requestBody).toContain('to=%2B2348011111111');
-    expect(requestBody).toContain('message=Help+is+needed');
-    expect(requestBody).toContain('from=Sentinel');
+    expect(requestBody).toContain('To=whatsapp%3A%2B2348011111111');
+    expect(requestBody).toContain('From=whatsapp%3A%2B14155238886');
+    expect(requestBody).toContain('Body=Help+is+needed');
+    expect(result.channel).toBe('whatsapp');
+  });
+
+  it('falls back to Twilio SMS when WhatsApp sending fails', async () => {
+    config.notifications.twilioAccountSid = 'AC123';
+    config.notifications.twilioAuthToken = 'auth-token';
+    config.notifications.twilioSmsFrom = '+15551230000';
+    config.notifications.twilioWhatsappFrom = 'whatsapp:+14155238886';
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        text: jest.fn().mockResolvedValue('Not a WhatsApp recipient'),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 201,
+        text: jest.fn().mockResolvedValue(JSON.stringify({ sid: 'SMsms' })),
+      });
+
+    const result = await _private.sendPhoneNotification({ id: 'contact-sms', phone: '08011111111' }, 'Help is needed');
+
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    expect(global.fetch.mock.calls[0][1].body).toContain('To=whatsapp%3A%2B2348011111111');
+    expect(global.fetch.mock.calls[1][1].body).toContain('To=%2B2348011111111');
+    expect(global.fetch.mock.calls[1][1].body).toContain('From=%2B15551230000');
+    expect(result.channel).toBe('sms');
   });
 
   it('targets every enabled contact that has a phone or email', () => {

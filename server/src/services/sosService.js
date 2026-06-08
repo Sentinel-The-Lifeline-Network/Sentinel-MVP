@@ -36,7 +36,7 @@ const queuedNotificationSummary = () => ({
   deliveryCount: 0,
   sentCount: 0,
   failedCount: 0,
-  channels: ['sms', 'email'],
+  channels: ['whatsapp', 'sms', 'email'],
   failures: [],
 });
 
