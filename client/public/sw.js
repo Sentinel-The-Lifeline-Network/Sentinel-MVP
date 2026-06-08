@@ -1,9 +1,11 @@
-const CACHE_NAME = 'sentinel-v4';
+const CACHE_NAME = 'sentinel-v5';
 const OFFLINE_URL = '/offline';
 
 const PRECACHE_URLS = [
   '/offline',
   '/manifest.json',
+  '/favicon.svg',
+  '/apple-touch-icon.svg',
   '/icons/icon.svg',
 ];
 

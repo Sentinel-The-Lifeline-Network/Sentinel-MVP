@@ -31,10 +31,13 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   manifest: '/manifest.json',
-  appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Sentinel' },
+  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'Sentinel' },
   icons: {
-    icon: [{ url: '/icons/icon.svg', type: 'image/svg+xml' }],
-    apple: [{ url: '/icons/icon.svg', type: 'image/svg+xml' }],
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icons/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [{ url: '/apple-touch-icon.svg', type: 'image/svg+xml' }],
   },
   openGraph: {
     type: 'website',
