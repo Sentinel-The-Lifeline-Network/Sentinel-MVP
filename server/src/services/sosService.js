@@ -109,11 +109,13 @@ const markSafe = async (alertId, userId) => {
 
   const userName = await getUserName(userId);
   const contacts = await getNotificationContacts(userId, userName);
-  notifyAlertClosed({ ...previousAlert, ...data, user_name: userName }, contacts, 'resolved').catch((err) => {
-    console.error('[Notification] Failed to send safe notification:', err.message);
-  });
+  const notificationSummary = await notifyAlertClosed(
+    { ...previousAlert, ...data, user_name: userName },
+    contacts,
+    'resolved'
+  );
 
-  return { ...data, notification_summary: queuedNotificationSummary() };
+  return { ...data, notification_summary: notificationSummary };
 };
 
 const stopAlert = async (alertId, userId) => {
@@ -131,11 +133,13 @@ const stopAlert = async (alertId, userId) => {
 
   const userName = await getUserName(userId);
   const contacts = await getNotificationContacts(userId, userName);
-  notifyAlertClosed({ ...previousAlert, ...data, user_name: userName }, contacts, 'cancelled').catch((err) => {
-    console.error('[Notification] Failed to send cancelled notification:', err.message);
-  });
+  const notificationSummary = await notifyAlertClosed(
+    { ...previousAlert, ...data, user_name: userName },
+    contacts,
+    'cancelled'
+  );
 
-  return { ...data, notification_summary: queuedNotificationSummary() };
+  return { ...data, notification_summary: notificationSummary };
 };
 
 const getAlertHistory = async (userId) => {

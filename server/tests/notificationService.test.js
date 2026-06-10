@@ -229,4 +229,42 @@ describe('notificationService', () => {
       expect.arrayContaining(['sms', 'email'])
     );
   });
+
+  it('sends a safe update message when the alert is resolved', async () => {
+    setupSupabase();
+    config.notifications.twilioAccountSid = 'AC123';
+    config.notifications.twilioAuthToken = 'auth-token';
+    config.notifications.twilioSmsFrom = '+15551230000';
+    config.notifications.twilioWhatsappFrom = undefined;
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      text: jest.fn().mockResolvedValue(JSON.stringify({ sid: 'SMsafe' })),
+    });
+
+    await notifyAlertClosed(alert, contacts.slice(1, 2), 'resolved');
+
+    const requestBody = global.fetch.mock.calls[0][1].body;
+    expect(requestBody).toContain('Sentinel+update%3A+Test+User+has+marked+themselves+safe');
+    expect(requestBody).toContain('Alert+status%3A+Safe');
+  });
+
+  it('sends a cancelled update message when the alert is cancelled', async () => {
+    setupSupabase();
+    config.notifications.twilioAccountSid = 'AC123';
+    config.notifications.twilioAuthToken = 'auth-token';
+    config.notifications.twilioSmsFrom = '+15551230000';
+    config.notifications.twilioWhatsappFrom = undefined;
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      text: jest.fn().mockResolvedValue(JSON.stringify({ sid: 'SMcancelled' })),
+    });
+
+    await notifyAlertClosed(alert, contacts.slice(1, 2), 'cancelled');
+
+    const requestBody = global.fetch.mock.calls[0][1].body;
+    expect(requestBody).toContain('Sentinel+update%3A+Test+User+has+cancelled+the+emergency+alert');
+    expect(requestBody).toContain('Alert+status%3A+Cancelled');
+  });
 });

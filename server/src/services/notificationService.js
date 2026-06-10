@@ -168,15 +168,30 @@ const sendPhoneNotification = async (contact, message) => {
 const getMailTransporter = () => {
   if (!mailTransporter) {
     mailTransporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: notificationConfig.smtpHost,
+      port: notificationConfig.smtpPort,
+      secure: notificationConfig.smtpSecure,
       auth: {
         user: notificationConfig.gmailUser,
         pass: notificationConfig.gmailAppPassword,
       },
+      connectionTimeout: notificationConfig.smtpConnectionTimeoutMs,
+      greetingTimeout: notificationConfig.smtpGreetingTimeoutMs,
+      socketTimeout: notificationConfig.smtpSocketTimeoutMs,
     });
   }
 
   return mailTransporter;
+};
+
+const sendMailWithRetry = async (mailOptions) => {
+  try {
+    return await getMailTransporter().sendMail(mailOptions);
+  } catch (err) {
+    logError('Email send attempt failed. Retrying once:', err.message);
+    mailTransporter = null;
+    return getMailTransporter().sendMail(mailOptions);
+  }
 };
 
 const sendEmail = async (contact, subject, message) => {
@@ -196,7 +211,7 @@ const sendEmail = async (contact, subject, message) => {
     return { status: 'sent', provider: 'development-log' };
   }
 
-  const info = await getMailTransporter().sendMail({
+  const info = await sendMailWithRetry({
     from: notificationConfig.emailFrom || notificationConfig.gmailUser,
     to: contact.email,
     subject,

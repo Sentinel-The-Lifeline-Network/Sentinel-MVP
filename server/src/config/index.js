@@ -22,6 +22,7 @@ const configuredEmailFrom = cleanEnv(process.env.EMAIL_FROM);
 const emailFrom = configuredEmailFrom?.includes('onboarding@resend.dev')
   ? cleanEnv(process.env.GMAIL_USER)
   : configuredEmailFrom || cleanEnv(process.env.GMAIL_USER);
+const smtpPort = parseInteger(process.env.SMTP_PORT, 465);
 
 if (nodeEnv === 'production' && !process.env.FRONTEND_URL) {
   throw new Error('FRONTEND_URL is required in production');
@@ -44,6 +45,12 @@ module.exports = {
     twilioWhatsappFrom: cleanEnv(process.env.TWILIO_WHATSAPP_FROM),
     gmailUser: cleanEnv(process.env.GMAIL_USER),
     gmailAppPassword: cleanEnv(process.env.GMAIL_APP_PASSWORD),
+    smtpHost: cleanEnv(process.env.SMTP_HOST) || 'smtp.gmail.com',
+    smtpPort,
+    smtpSecure: cleanEnv(process.env.SMTP_SECURE) ? cleanEnv(process.env.SMTP_SECURE) === 'true' : smtpPort === 465,
+    smtpConnectionTimeoutMs: parseInteger(process.env.SMTP_CONNECTION_TIMEOUT_MS, 15000),
+    smtpGreetingTimeoutMs: parseInteger(process.env.SMTP_GREETING_TIMEOUT_MS, 10000),
+    smtpSocketTimeoutMs: parseInteger(process.env.SMTP_SOCKET_TIMEOUT_MS, 20000),
     emailFrom,
   },
 };
