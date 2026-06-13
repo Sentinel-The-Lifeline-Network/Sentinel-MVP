@@ -78,6 +78,10 @@ ALTER TABLE notifications_log
   ADD COLUMN IF NOT EXISTS delivered_at TIMESTAMPTZ,
   ADD COLUMN IF NOT EXISTS error_message TEXT;
 
+-- Drop legacy rows from the old email/SMS notification system; they predate
+-- the whatsapp/push-only model and would violate the new channel check.
+DELETE FROM notifications_log WHERE channel NOT IN ('whatsapp', 'push');
+
 ALTER TABLE notifications_log DROP CONSTRAINT IF EXISTS alert_notifications_channel_check;
 ALTER TABLE notifications_log
   ADD CONSTRAINT notifications_log_channel_check CHECK (channel IN ('whatsapp', 'push'));
