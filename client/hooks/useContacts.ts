@@ -38,5 +38,11 @@ export const useContacts = () => {
     setContacts((prev) => prev.filter((c) => c.id !== id));
   }, []);
 
-  return { contacts, loading, error, addContact, updateContact, removeContact, reload: load };
+  const resendInvite = useCallback(async (id: string) => {
+    const updated = await contactsService.resendInvite(id);
+    setContacts((prev) => prev.map((c) => (c.id === id ? updated : c)));
+    return updated;
+  }, []);
+
+  return { contacts, loading, error, addContact, updateContact, removeContact, resendInvite, reload: load };
 };

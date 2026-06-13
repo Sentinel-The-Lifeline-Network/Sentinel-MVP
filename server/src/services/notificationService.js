@@ -1,20 +1,11 @@
 const supabase = require('../config/supabase');
 const { frontendUrl, notifications: notificationConfig, nodeEnv } = require('../config');
-const nodemailer = require('nodemailer');
+const whatsappService = require('./whatsappService');
+const pushService = require('./pushService');
 
 const activeNotificationJobs = new Map();
-let mailTransporter;
 
-const twilioMessagesUrl = () =>
-  `https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(notificationConfig.twilioAccountSid)}/Messages.json`;
-
-const twilioAuthHeader = () =>
-  `Basic ${Buffer.from(`${notificationConfig.twilioAccountSid}:${notificationConfig.twilioAuthToken}`).toString('base64')}`;
-
-const whatsappAddressFor = (phone) => {
-  if (!phone) return '';
-  return phone.startsWith('whatsapp:') ? phone : `whatsapp:${phone}`;
-};
+const WHATSAPP_REMINDER_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
 const log = (...args) => {
   if (nodeEnv !== 'test') console.log('[Notification]', ...args);
@@ -24,218 +15,87 @@ const logError = (...args) => {
   if (nodeEnv !== 'test') console.error('[Notification]', ...args);
 };
 
-const enabledContacts = (contacts = []) =>
-  contacts.filter((contact) => contact.notification_enabled !== false && (contact.phone || contact.email));
-
 const trackingUrlFor = (alert) => `${frontendUrl.replace(/\/$/, '')}/track/${alert.tracking_token}`;
 
-const locationTextFor = (alert) => {
-  if (!alert.last_latitude || !alert.last_longitude) return 'Location is still being acquired.';
-  return `Last known location: https://maps.google.com/?q=${alert.last_latitude},${alert.last_longitude}`;
+const locationLinkFor = (alert) => {
+  if (!alert.last_latitude || !alert.last_longitude) return trackingUrlFor(alert);
+  return `https://maps.google.com/?q=${alert.last_latitude},${alert.last_longitude}`;
 };
 
-const emergencyMessage = (alert, contact) =>
-  [
-    `EMERGENCY SOS: ${contact.user_name || 'A Sentinel user'} has triggered an emergency alert.`,
-    locationTextFor(alert),
-    `Live tracking: ${trackingUrlFor(alert)}`,
-    'This alert will repeat every 5 minutes until the user marks safe or cancels it.',
-  ].join('\n');
-
-const finalMessage = (alert, status) => {
-  const statusText = status === 'resolved'
-    ? 'has marked themselves safe'
-    : 'has cancelled the emergency alert';
-
-  return [
-    `Sentinel update: ${alert.user_name || 'The Sentinel user'} ${statusText}.`,
-    `Alert status: ${status === 'resolved' ? 'Safe' : 'Cancelled'}.`,
-    `Reference: ${trackingUrlFor(alert)}`,
-  ].join('\n');
-};
-
-const normalizePhoneNumber = (phone) => {
-  const digits = String(phone || '').replace(/\D/g, '');
-  if (!digits) return '';
-
-  if (digits.startsWith('00')) return digits.slice(2);
-  if (digits.startsWith('234')) return digits;
-
-  // Nigeria local mobile format: 070..., 080..., 090... -> 23470..., 23480..., 23490...
-  if (digits.startsWith('0') && digits.length >= 10) return `234${digits.slice(1)}`;
-
-  // Nigeria mobile without leading zero: 70..., 80..., 90... -> 23470..., 23480..., 23490...
-  if (/^[789]\d{9}$/.test(digits)) return `234${digits}`;
-
-  return digits;
-};
-
-const sendTwilioMessage = async ({ to, from, body, channel }) => {
-  const payload = new URLSearchParams({
-    To: to,
-    From: from,
-    Body: body,
-  });
-
-  const res = await fetch(twilioMessagesUrl(), {
-    method: 'POST',
-    headers: {
-      Authorization: twilioAuthHeader(),
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: payload.toString(),
-  });
-
-  const responseBody = await res.text();
-  if (!res.ok) {
-    throw new Error(`${channel} delivery failed with ${res.status}: ${responseBody}`);
-  }
-
-  const parsedBody = JSON.parse(responseBody || '{}');
-  return {
-    status: 'sent',
-    provider: 'twilio',
-    channel,
-    sid: parsedBody.sid,
-  };
-};
-
-const sendPhoneNotification = async (contact, message) => {
-  const normalizedPhone = normalizePhoneNumber(contact.phone);
-  const recipient = normalizedPhone ? `+${normalizedPhone}` : '';
-
-  log('Phone notification attempt', {
-    contactId: contact.id,
-    phoneLast4: normalizedPhone.slice(-4),
-    normalizedPhoneLength: normalizedPhone.length,
-    hasAccountSid: Boolean(notificationConfig.twilioAccountSid),
-    hasAuthToken: Boolean(notificationConfig.twilioAuthToken),
-    hasWhatsappFrom: Boolean(notificationConfig.twilioWhatsappFrom),
-    hasSmsFrom: Boolean(notificationConfig.twilioSmsFrom),
-  });
-
-  if (!normalizedPhone) {
-    throw new Error(`Phone number is empty or invalid for contact ${contact.id}`);
-  }
-
-  if (!notificationConfig.twilioAccountSid || !notificationConfig.twilioAuthToken || !notificationConfig.twilioSmsFrom) {
-    if (nodeEnv === 'production') {
-      throw new Error('Twilio credentials are missing. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_SMS_FROM.');
-    }
-    log(`Phone notification fallback to ${contact.phone}: ${message}`);
-    return { status: 'sent', provider: 'development-log', channel: 'sms' };
-  }
-
-  if (notificationConfig.twilioWhatsappFrom) {
-    try {
-      const whatsappResult = await sendTwilioMessage({
-        to: `whatsapp:${recipient}`,
-        from: whatsappAddressFor(notificationConfig.twilioWhatsappFrom),
-        body: message,
-        channel: 'whatsapp',
-      });
-
-      log('WhatsApp send success', {
-        contactId: contact.id,
-        phoneLast4: normalizedPhone.slice(-4),
-        sid: whatsappResult.sid,
-      });
-      return whatsappResult;
-    } catch (err) {
-      logError('WhatsApp failed. Falling back to SMS:', {
-        contactId: contact.id,
-        phoneLast4: normalizedPhone.slice(-4),
-        message: err.message,
-      });
-    }
-  }
-
-  const smsResult = await sendTwilioMessage({
-    to: recipient,
-    from: notificationConfig.twilioSmsFrom,
-    body: message,
-    channel: 'sms',
-  });
-
-  log('SMS send success', {
-    contactId: contact.id,
-    phoneLast4: normalizedPhone.slice(-4),
-    sid: smsResult.sid,
-  });
-  return smsResult;
-};
-
-const getMailTransporter = () => {
-  if (!mailTransporter) {
-    mailTransporter = nodemailer.createTransport({
-      host: notificationConfig.smtpHost,
-      port: notificationConfig.smtpPort,
-      secure: notificationConfig.smtpSecure,
-      auth: {
-        user: notificationConfig.gmailUser,
-        pass: notificationConfig.gmailAppPassword,
-      },
-      connectionTimeout: notificationConfig.smtpConnectionTimeoutMs,
-      greetingTimeout: notificationConfig.smtpGreetingTimeoutMs,
-      socketTimeout: notificationConfig.smtpSocketTimeoutMs,
-    });
-  }
-
-  return mailTransporter;
-};
-
-const sendMailWithRetry = async (mailOptions) => {
-  try {
-    return await getMailTransporter().sendMail(mailOptions);
-  } catch (err) {
-    logError('Email send attempt failed. Retrying once:', err.message);
-    mailTransporter = null;
-    return getMailTransporter().sendMail(mailOptions);
-  }
-};
-
-const sendEmail = async (contact, subject, message) => {
-  log('Email send attempt', {
-    contactId: contact.id,
-    email: contact.email,
-    from: notificationConfig.emailFrom,
-    hasGmailUser: Boolean(notificationConfig.gmailUser),
-    hasGmailAppPassword: Boolean(notificationConfig.gmailAppPassword),
-  });
-
-  if (!notificationConfig.gmailUser || !notificationConfig.gmailAppPassword) {
-    if (nodeEnv === 'production') {
-      throw new Error('Gmail SMTP credentials are missing. Set GMAIL_USER and GMAIL_APP_PASSWORD.');
-    }
-    log(`Email fallback to ${contact.email}: ${subject}\n${message}`);
-    return { status: 'sent', provider: 'development-log' };
-  }
-
-  const info = await sendMailWithRetry({
-    from: notificationConfig.emailFrom || notificationConfig.gmailUser,
-    to: contact.email,
-    subject,
-    text: message,
-  });
-
-  log('Email send success', {
-    contactId: contact.id,
-    email: contact.email,
-    messageId: info.messageId,
-  });
-  return { status: 'sent', provider: 'gmail-smtp' };
-};
-
-const logNotification = async ({ alertId, contactId, channel, status }) => {
-  const { error } = await supabase.from('alert_notifications').insert({
-    alert_id: alertId,
+const logNotification = async ({ incidentId, userId, contactId, channel, status, message, errorMessage }) => {
+  const { error } = await supabase.from('notifications_log').insert({
+    incident_id: incidentId,
+    user_id: userId,
     contact_id: contactId,
     channel,
     status,
+    message,
     sent_at: status === 'sent' ? new Date().toISOString() : null,
+    error_message: errorMessage || null,
   });
 
   if (error) logError('Failed to log notification:', error.message);
+};
+
+const sendPushToContact = async (alert, contact, payload) => {
+  const result = await pushService.sendPushNotification(contact.push_token, payload);
+
+  if (result.status === 'sent') {
+    await logNotification({
+      incidentId: alert.id,
+      userId: alert.user_id,
+      contactId: contact.id,
+      channel: 'push',
+      status: 'sent',
+      message: payload.body,
+    });
+  } else {
+    await logNotification({
+      incidentId: alert.id,
+      userId: alert.user_id,
+      contactId: contact.id,
+      channel: 'push',
+      status: 'failed',
+      message: payload.body,
+      errorMessage: result.message,
+    });
+
+    if (result.tokenInvalid) {
+      await supabase
+        .from('emergency_contacts')
+        .update({ push_enabled: false, invite_status: 'push_disabled' })
+        .eq('id', contact.id);
+    }
+  }
+
+  return { contactId: contact.id, contactName: contact.contact_name, channel: 'push', status: result.status, message: result.message };
+};
+
+const sendWhatsAppToContact = async (alert, contact, message) => {
+  try {
+    await whatsappService.sendWhatsAppMessage(contact.phone_number, message);
+    await logNotification({
+      incidentId: alert.id,
+      userId: alert.user_id,
+      contactId: contact.id,
+      channel: 'whatsapp',
+      status: 'sent',
+      message,
+    });
+    return { contactId: contact.id, contactName: contact.contact_name, channel: 'whatsapp', status: 'sent' };
+  } catch (err) {
+    logError('WhatsApp delivery failed:', { contactId: contact.id, message: err.message });
+    await logNotification({
+      incidentId: alert.id,
+      userId: alert.user_id,
+      contactId: contact.id,
+      channel: 'whatsapp',
+      status: 'failed',
+      message,
+      errorMessage: err.message,
+    });
+    return { contactId: contact.id, contactName: contact.contact_name, channel: 'whatsapp', status: 'failed', message: err.message };
+  }
 };
 
 const summarizeDeliveryResults = (contacts, results) => ({
@@ -254,81 +114,84 @@ const summarizeDeliveryResults = (contacts, results) => ({
     })),
 });
 
-const deliverToContact = async ({ alert, contact, subject, message }) => {
-  const deliveries = [];
+const updateLastWhatsappSentAt = async (alertId) => {
+  const { error } = await supabase
+    .from('sos_alerts')
+    .update({ last_whatsapp_sent_at: new Date().toISOString() })
+    .eq('id', alertId);
 
-  if (contact.phone) deliveries.push(['sms', () => sendPhoneNotification(contact, message)]);
-  if (contact.email) deliveries.push(['email', () => sendEmail(contact, subject, message)]);
-
-  log('Delivering to contact', {
-    alertId: alert.id,
-    contactId: contact.id,
-    contactName: contact.full_name,
-    channels: deliveries.map(([channel]) => channel),
-    notificationEnabled: contact.notification_enabled !== false,
-  });
-
-  return Promise.all(
-    deliveries.map(async ([channel, send]) => {
-      try {
-        const result = await send();
-        const deliveredChannel = result?.channel || channel;
-        await logNotification({ alertId: alert.id, contactId: contact.id, channel: deliveredChannel, status: 'sent' });
-        log('Delivery logged as sent', { alertId: alert.id, contactId: contact.id, channel: deliveredChannel });
-        return {
-          contactId: contact.id,
-          contactName: contact.full_name,
-          channel: deliveredChannel,
-          status: 'sent',
-        };
-      } catch (err) {
-        logError(`${channel} failed:`, {
-          alertId: alert.id,
-          contactId: contact.id,
-          message: err.message,
-        });
-        await logNotification({ alertId: alert.id, contactId: contact.id, channel, status: 'failed' });
-        return {
-          contactId: contact.id,
-          contactName: contact.full_name,
-          channel,
-          status: 'failed',
-          message: err.message,
-        };
-      }
-    })
-  );
+  if (error) logError('Failed to update last_whatsapp_sent_at:', error.message);
 };
 
-const notifyContactsNow = async (alert, contacts, options = {}) => {
-  const contactsToNotify = enabledContacts(contacts);
-  log('Notification batch starting', {
-    alertId: alert.id,
-    totalContacts: contacts.length,
-    enabledContacts: contactsToNotify.length,
-    frontendUrl,
-  });
+// SOS start: WhatsApp SOS alert to every contact with a phone number,
+// plus an SOS push to contacts who accepted the invite and enabled push.
+const sendInitialNotifications = async (alert, contacts) => {
+  log('Sending initial SOS notifications', { alertId: alert.id, contactCount: contacts.length });
 
-  if (contactsToNotify.length === 0) {
-    log('No enabled contacts with phone or email found for alert', { alertId: alert.id });
-    return summarizeDeliveryResults([], []);
-  }
+  if (contacts.length === 0) return summarizeDeliveryResults([], []);
 
-  const subject = options.subject || 'Sentinel SOS emergency alert';
-  const message = options.message || emergencyMessage(alert, contactsToNotify[0]);
+  const userName = alert.user_name || 'A Sentinel user';
+  const whatsappMessage = whatsappService.buildSosAlertMessage({ userName, locationLink: locationLinkFor(alert) });
+  const pushPayload = pushService.buildSosPushPayload({ userName, trackingUrl: trackingUrlFor(alert) });
 
   const results = await Promise.all(
-    contactsToNotify.map((contact) =>
-      deliverToContact({
-        alert,
-        contact,
-        subject,
-        message: options.messageFactory ? options.messageFactory(contact) : message,
-      })
-    )
+    contacts.map(async (contact) => {
+      const deliveries = [];
+      if (contact.phone_number) deliveries.push(sendWhatsAppToContact(alert, contact, whatsappMessage));
+      if (contact.push_enabled && contact.push_token) deliveries.push(sendPushToContact(alert, contact, pushPayload));
+      return Promise.all(deliveries);
+    })
   );
 
-  return summarizeDeliveryResults(contactsToNotify, results.flat());
+  await updateLastWhatsappSentAt(alert.id);
+
+  return summarizeDeliveryResults(contacts, results.flat());
+};
+
+// Every 5 minutes while the incident is active: push-only "still active" reminder
+// to contacts who accepted the invite and enabled push. No WhatsApp here.
+const sendPushReminder = async (alert, contacts) => {
+  const pushEnabled = contacts.filter((contact) => contact.push_enabled && contact.push_token);
+  if (pushEnabled.length === 0) return summarizeDeliveryResults([], []);
+
+  const userName = alert.user_name || 'A Sentinel user';
+  const payload = pushService.buildActiveReminderPushPayload({ userName, trackingUrl: trackingUrlFor(alert) });
+
+  const results = await Promise.all(pushEnabled.map((contact) => sendPushToContact(alert, contact, payload)));
+  return summarizeDeliveryResults(pushEnabled, results);
+};
+
+// At most one WhatsApp reminder per contact every 24 hours while the incident remains active.
+const maybeSendWhatsappReminder = async (alert, contacts) => {
+  const lastSentAt = alert.last_whatsapp_sent_at ? new Date(alert.last_whatsapp_sent_at).getTime() : 0;
+  if (Date.now() - lastSentAt < WHATSAPP_REMINDER_INTERVAL_MS) return null;
+
+  const withPhone = contacts.filter((contact) => contact.phone_number);
+  if (withPhone.length === 0) return null;
+
+  const userName = alert.user_name || 'A Sentinel user';
+  const message = whatsappService.buildActiveReminderMessage({ userName, locationLink: locationLinkFor(alert) });
+
+  const results = await Promise.all(withPhone.map((contact) => sendWhatsAppToContact(alert, contact, message)));
+  await updateLastWhatsappSentAt(alert.id);
+
+  return summarizeDeliveryResults(withPhone, results);
+};
+
+// Incident resolved/cancelled: push-only update to contacts who accepted the invite
+// and enabled push. No WhatsApp is sent for resolved or cancelled incidents.
+const sendClosureNotification = async (alert, contacts, status) => {
+  const pushEnabled = contacts.filter((contact) => contact.push_enabled && contact.push_token);
+  if (pushEnabled.length === 0) return summarizeDeliveryResults([], []);
+
+  const userName = alert.user_name || 'A Sentinel user';
+  const trackingUrl = trackingUrlFor(alert);
+  const payload = status === 'resolved'
+    ? pushService.buildSafePushPayload({ userName, trackingUrl })
+    : pushService.buildCancelledPushPayload({ userName, trackingUrl });
+
+  const results = await Promise.all(pushEnabled.map((contact) => sendPushToContact(alert, contact, payload)));
+  return summarizeDeliveryResults(pushEnabled, results);
 };
 
 const startRecurringEmergencyNotifications = async (alert, contacts, options = {}) => {
@@ -342,17 +205,12 @@ const startRecurringEmergencyNotifications = async (alert, contacts, options = {
     sendImmediately,
     waitForImmediate,
     repeatIntervalMs: notificationConfig.repeatIntervalMs,
-    hasPhoneConfig: Boolean(notificationConfig.twilioAccountSid && notificationConfig.twilioAuthToken && notificationConfig.twilioSmsFrom),
-    hasWhatsappConfig: Boolean(notificationConfig.twilioWhatsappFrom),
-    hasEmailConfig: Boolean(notificationConfig.gmailUser && notificationConfig.gmailAppPassword),
+    hasWhatsappConfig: Boolean(notificationConfig.twilioAccountSid && notificationConfig.twilioAuthToken && notificationConfig.twilioWhatsappFrom),
+    hasPushConfig: pushService.isConfigured(),
   });
 
   const sendImmediateNotifications = async () => {
-    const summary = await notifyContactsNow(alert, contacts, {
-      subject: 'Sentinel SOS emergency alert',
-      messageFactory: (contact) => emergencyMessage(alert, contact),
-    });
-
+    const summary = await sendInitialNotifications(alert, contacts);
     options.onImmediateSummary?.(summary);
     return summary;
   };
@@ -378,10 +236,8 @@ const startRecurringEmergencyNotifications = async (alert, contacts, options = {
       const alertWithUser = { ...latestAlert, user_name: alert.user_name };
       const latestContacts = await getContactsForNotification(latestAlert.user_id, alert.user_name);
 
-      await notifyContactsNow(alertWithUser, latestContacts, {
-        subject: 'Sentinel SOS reminder - emergency alert still active',
-        messageFactory: (contact) => emergencyMessage(alertWithUser, contact),
-      });
+      await sendPushReminder(alertWithUser, latestContacts);
+      await maybeSendWhatsappReminder(alertWithUser, latestContacts);
     } catch (err) {
       logError('Recurring notification failed:', err.message);
     }
@@ -408,10 +264,7 @@ const notifyAlertClosed = async (alert, contacts, status) => {
   stopRecurringEmergencyNotifications(alert.id);
   log('Sending alert closed notification', { alertId: alert.id, status, contactCount: contacts.length });
 
-  return notifyContactsNow(alert, contacts, {
-    subject: status === 'resolved' ? 'Sentinel update - user is safe' : 'Sentinel update - alert cancelled',
-    message: finalMessage(alert, status),
-  });
+  return sendClosureNotification(alert, contacts, status);
 };
 
 const getActiveAlertForNotification = async (alertId) => {
@@ -433,7 +286,7 @@ const getContactsForNotification = async (userId, userName) => {
     .eq('user_id', userId);
 
   const { data, error } = typeof query.order === 'function'
-    ? await query.order('created_at', { ascending: true })
+    ? await query.order('priority', { ascending: true })
     : await query;
 
   if (error) throw error;
@@ -464,9 +317,12 @@ const resumeActiveEmergencyNotifications = async () => {
     data.map(async (alert) => {
       const userName = await getUserNameForNotification(alert.user_id);
       const contacts = await getContactsForNotification(alert.user_id, userName);
+      // Resuming an existing incident does not count as a new SOS trigger,
+      // so skip the immediate WhatsApp+push burst and just resume the schedule.
       await startRecurringEmergencyNotifications(
         { ...alert, user_name: userName },
-        contacts
+        contacts,
+        { sendImmediately: false }
       );
     })
   );
@@ -480,9 +336,7 @@ module.exports = {
   notifyAlertClosed,
   resumeActiveEmergencyNotifications,
   _private: {
-    enabledContacts,
-    normalizePhoneNumber,
-    sendPhoneNotification,
-    sendTwilioMessage,
+    locationLinkFor,
+    trackingUrlFor,
   },
 };

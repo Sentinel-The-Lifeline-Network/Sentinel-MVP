@@ -36,7 +36,7 @@ const queuedNotificationSummary = () => ({
   deliveryCount: 0,
   sentCount: 0,
   failedCount: 0,
-  channels: ['whatsapp', 'sms', 'email'],
+  channels: ['whatsapp', 'push'],
   failures: [],
 });
 
@@ -158,7 +158,7 @@ const getAlertHistory = async (userId) => {
 const getAlertById = async (alertId, userId) => {
   const query = supabase
     .from('sos_alerts')
-    .select('*, location_updates(*), alert_notifications(*)')
+    .select('*, location_updates(*), notifications_log(*)')
     .eq('id', alertId);
 
   if (userId) query.eq('user_id', userId);

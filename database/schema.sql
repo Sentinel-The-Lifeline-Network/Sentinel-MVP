@@ -30,14 +30,23 @@ CREATE POLICY "users_own" ON users
 -- EMERGENCY CONTACTS
 -- ============================================================
 CREATE TABLE IF NOT EXISTS emergency_contacts (
-  id                   UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id              UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  full_name            TEXT NOT NULL,
-  phone                TEXT NOT NULL,
-  email                TEXT NOT NULL,
-  relationship         TEXT NOT NULL,
-  notification_enabled BOOLEAN NOT NULL DEFAULT TRUE,
-  created_at           TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id                      UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id                 UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  contact_name            TEXT NOT NULL,
+  phone_number            TEXT NOT NULL,
+  relationship            TEXT NOT NULL,
+  priority                INT NOT NULL DEFAULT 3 CHECK (priority BETWEEN 1 AND 3),
+  invite_status           TEXT NOT NULL DEFAULT 'pending_invite'
+                            CHECK (invite_status IN ('pending_invite', 'accepted', 'push_enabled', 'push_disabled', 'whatsapp_only')),
+  invite_token            TEXT NOT NULL UNIQUE DEFAULT replace(uuid_generate_v4()::text, '-', ''),
+  invite_link             TEXT,
+  whatsapp_invite_sent_at TIMESTAMPTZ,
+  accepted_at             TIMESTAMPTZ,
+  push_enabled            BOOLEAN NOT NULL DEFAULT FALSE,
+  push_token              TEXT,
+  created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, phone_number)
 );
 
 ALTER TABLE emergency_contacts ENABLE ROW LEVEL SECURITY;
@@ -45,6 +54,20 @@ ALTER TABLE emergency_contacts ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "contacts_own" ON emergency_contacts
   USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
+
+-- Auto-maintain updated_at
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS set_emergency_contacts_updated_at ON emergency_contacts;
+CREATE TRIGGER set_emergency_contacts_updated_at
+  BEFORE UPDATE ON emergency_contacts
+  FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();
 
 -- ============================================================
 -- SOS ALERTS
@@ -58,6 +81,7 @@ CREATE TABLE IF NOT EXISTS sos_alerts (
   last_latitude             DOUBLE PRECISION,
   last_longitude            DOUBLE PRECISION,
   last_location_timestamp   TIMESTAMPTZ,
+  last_whatsapp_sent_at     TIMESTAMPTZ,
   tracking_token            TEXT NOT NULL UNIQUE,
   created_at                TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -121,30 +145,34 @@ CREATE INDEX IF NOT EXISTS idx_location_updates_alert_id ON location_updates(ale
 CREATE INDEX IF NOT EXISTS idx_location_updates_created_at ON location_updates(created_at);
 
 -- ============================================================
--- ALERT NOTIFICATIONS
+-- NOTIFICATIONS LOG
 -- ============================================================
-CREATE TABLE IF NOT EXISTS alert_notifications (
-  id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  alert_id   UUID NOT NULL REFERENCES sos_alerts(id) ON DELETE CASCADE,
-  contact_id UUID NOT NULL REFERENCES emergency_contacts(id) ON DELETE CASCADE,
-  channel    TEXT NOT NULL DEFAULT 'app' CHECK (channel IN ('app', 'sms', 'whatsapp', 'email', 'push')),
-  status     TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'failed')),
-  sent_at    TIMESTAMPTZ,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+CREATE TABLE IF NOT EXISTS notifications_log (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  incident_id   UUID NOT NULL REFERENCES sos_alerts(id) ON DELETE CASCADE,
+  user_id       UUID REFERENCES users(id) ON DELETE CASCADE,
+  contact_id    UUID NOT NULL REFERENCES emergency_contacts(id) ON DELETE CASCADE,
+  channel       TEXT NOT NULL CHECK (channel IN ('whatsapp', 'push')),
+  status        TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'delivered', 'failed')),
+  message       TEXT,
+  sent_at       TIMESTAMPTZ,
+  delivered_at  TIMESTAMPTZ,
+  error_message TEXT,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-ALTER TABLE alert_notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications_log ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "notifications_via_alert" ON alert_notifications
+CREATE POLICY "notifications_via_incident" ON notifications_log
   USING (
     EXISTS (
       SELECT 1 FROM sos_alerts sa
-      WHERE sa.id = alert_id AND sa.user_id = auth.uid()
+      WHERE sa.id = incident_id AND sa.user_id = auth.uid()
     )
     OR EXISTS (SELECT 1 FROM users u WHERE u.id = auth.uid() AND u.role IN ('responder', 'admin'))
   );
 
-CREATE INDEX IF NOT EXISTS idx_alert_notifications_alert_id ON alert_notifications(alert_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_log_incident_id ON notifications_log(incident_id);
 
 -- ============================================================
 -- EVIDENCE RECORDS

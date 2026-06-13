@@ -1,5 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn(), back: jest.fn() }),
@@ -11,13 +10,19 @@ jest.mock('@/hooks/useContacts', () => ({
     contacts: [
       {
         id: '1',
-        full_name: 'Jane Doe',
-        phone: '+2348012345678',
+        contact_name: 'Jane Doe',
+        phone_number: '+2348012345678',
         relationship: 'Spouse',
-        notification_enabled: true,
-        email: null,
+        priority: 1,
+        invite_status: 'pending_invite',
+        invite_token: 'token123',
+        invite_link: 'https://example.com/invite/token123',
+        whatsapp_invite_sent_at: null,
+        accepted_at: null,
+        push_enabled: false,
         user_id: 'user-1',
         created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       },
     ],
     loading: false,
@@ -25,6 +30,7 @@ jest.mock('@/hooks/useContacts', () => ({
     addContact: jest.fn().mockResolvedValue({}),
     updateContact: jest.fn().mockResolvedValue({}),
     removeContact: jest.fn().mockResolvedValue({}),
+    resendInvite: jest.fn().mockResolvedValue({}),
     reload: jest.fn(),
   }),
 }));
@@ -49,22 +55,28 @@ describe('ContactsPage', () => {
     expect(screen.getByText('Jane Doe')).toBeInTheDocument();
   });
 
-  it('shows Contacts heading', () => {
+  it('shows Guardian Circle heading', () => {
     render(<ContactsPage />);
-    expect(screen.getByRole('heading', { name: /contacts/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /guardian circle/i })).toBeInTheDocument();
   });
 });
 
 describe('ContactCard', () => {
   const contact = {
     id: '1',
-    full_name: 'Jane Doe',
-    phone: '+2348012345678',
+    contact_name: 'Jane Doe',
+    phone_number: '+2348012345678',
     relationship: 'Spouse',
-    notification_enabled: true,
-    email: null,
+    priority: 1,
+    invite_status: 'pending_invite' as const,
+    invite_token: 'token123',
+    invite_link: 'https://example.com/invite/token123',
+    whatsapp_invite_sent_at: null,
+    accepted_at: null,
+    push_enabled: false,
     user_id: 'user-1',
     created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   };
 
   it('renders contact name', () => {
@@ -72,9 +84,9 @@ describe('ContactCard', () => {
       <ContactCard
         contact={contact}
         index={0}
-        onToggle={jest.fn()}
         onDelete={jest.fn()}
         onEdit={jest.fn()}
+        onResendInvite={jest.fn()}
       />
     );
     expect(screen.getByText('Jane Doe')).toBeInTheDocument();
@@ -85,26 +97,27 @@ describe('ContactCard', () => {
       <ContactCard
         contact={contact}
         index={0}
-        onToggle={jest.fn()}
         onDelete={jest.fn()}
         onEdit={jest.fn()}
+        onResendInvite={jest.fn()}
       />
     );
     expect(screen.getByText(/Spouse/)).toBeInTheDocument();
   });
 
-  it('calls onToggle when toggle is clicked', () => {
-    const onToggle = jest.fn();
+  it('shows resend invite action when expanded', () => {
+    const onResendInvite = jest.fn();
     render(
       <ContactCard
         contact={contact}
         index={0}
-        onToggle={onToggle}
         onDelete={jest.fn()}
         onEdit={jest.fn()}
+        onResendInvite={onResendInvite}
       />
     );
-    fireEvent.click(screen.getByLabelText(/disable notifications/i));
-    expect(onToggle).toHaveBeenCalledWith('1', false);
+    fireEvent.click(screen.getByLabelText(/show contact actions/i));
+    fireEvent.click(screen.getByText(/resend invite/i));
+    expect(onResendInvite).toHaveBeenCalledWith('1');
   });
 });

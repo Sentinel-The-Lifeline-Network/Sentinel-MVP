@@ -1,25 +1,42 @@
 'use client';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Contact } from '@/services/contactsService';
+import { Contact, InviteStatus } from '@/services/contactsService';
 
 interface ContactCardProps {
   contact: Contact;
   index: number;
-  onToggle: (id: string, enabled: boolean) => void;
   onDelete: (id: string) => void;
   onEdit: (contact: Contact) => void;
+  onResendInvite: (id: string) => void;
 }
 
-export default function ContactCard({ contact, index, onToggle, onDelete, onEdit }: ContactCardProps) {
+const PRIORITY_LABELS: Record<number, { label: string; color: string; bg: string }> = {
+  1: { label: 'High', color: '#C53A2D', bg: '#FBEAE7' },
+  2: { label: 'Medium', color: '#A8730B', bg: '#FBF1DE' },
+  3: { label: 'Low', color: '#3D6B5C', bg: '#E7F0EC' },
+};
+
+const STATUS_BADGES: Record<InviteStatus, { label: string; color: string; bg: string }> = {
+  pending_invite: { label: 'Pending Invite', color: '#A8730B', bg: '#FBF1DE' },
+  accepted: { label: 'Accepted', color: '#1D5DAD', bg: '#E6EEF9' },
+  push_enabled: { label: 'Push Enabled', color: '#1F5A47', bg: '#E1EFE8' },
+  push_disabled: { label: 'Push Disabled', color: '#6B6B6B', bg: '#F0EEEA' },
+  whatsapp_only: { label: 'WhatsApp Only', color: '#0E7C7B', bg: '#E2F4F3' },
+};
+
+export default function ContactCard({ contact, index, onDelete, onEdit, onResendInvite }: ContactCardProps) {
   const [showActions, setShowActions] = useState(false);
 
-  const initials = contact.full_name
+  const initials = contact.contact_name
     .split(' ')
     .map((n) => n[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
+
+  const priority = PRIORITY_LABELS[contact.priority] || PRIORITY_LABELS[3];
+  const status = STATUS_BADGES[contact.invite_status] || STATUS_BADGES.pending_invite;
 
   return (
     <motion.div
@@ -41,26 +58,9 @@ export default function ContactCard({ contact, index, onToggle, onDelete, onEdit
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate" style={{ color: '#151515' }}>{contact.full_name}</p>
-          <p className="text-xs text-muted truncate">{contact.relationship} · {contact.phone}</p>
+          <p className="text-sm font-semibold truncate" style={{ color: '#151515' }}>{contact.contact_name}</p>
+          <p className="text-xs text-muted truncate">{contact.relationship} · {contact.phone_number}</p>
         </div>
-
-        {/* Notification toggle */}
-        <button
-          onClick={() => onToggle(contact.id, !contact.notification_enabled)}
-          className="relative w-10 h-6 rounded-full transition-all flex-shrink-0"
-          style={{
-            background: contact.notification_enabled ? '#1F5A47' : '#E7E0D7',
-            border: '2px solid #E7E0D7',
-          }}
-          aria-label={contact.notification_enabled ? 'Disable notifications' : 'Enable notifications'}
-        >
-          <motion.div
-            className="absolute top-0.5 w-4 h-4 rounded-full bg-white"
-            animate={{ left: contact.notification_enabled ? '18px' : '2px' }}
-            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-          />
-        </button>
 
         {/* More button */}
         <button
@@ -76,10 +76,26 @@ export default function ContactCard({ contact, index, onToggle, onDelete, onEdit
         </button>
       </div>
 
+      {/* Badges */}
+      <div className="flex items-center gap-1.5 mt-3">
+        <span
+          className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide"
+          style={{ color: priority.color, background: priority.bg }}
+        >
+          {priority.label} Priority
+        </span>
+        <span
+          className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide"
+          style={{ color: status.color, background: status.bg }}
+        >
+          {status.label}
+        </span>
+      </div>
+
       <AnimatePresence>
         {showActions && (
           <motion.div
-            className="flex gap-2 mt-3 pt-3"
+            className="flex gap-2 mt-3 pt-3 flex-wrap"
             style={{ borderTop: '1px solid #E7E0D7' }}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
@@ -94,12 +110,21 @@ export default function ContactCard({ contact, index, onToggle, onDelete, onEdit
               Edit
             </button>
             <a
-              href={`tel:${contact.phone}`}
+              href={`tel:${contact.phone_number}`}
               className="flex-1 py-2 rounded-xl text-xs font-semibold text-center transition-all active:scale-95"
               style={{ background: '#F7F4EE', color: '#0B3D2E' }}
             >
               Call
             </a>
+            {contact.invite_status !== 'push_enabled' && (
+              <button
+                onClick={() => { onResendInvite(contact.id); setShowActions(false); }}
+                className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95"
+                style={{ background: '#E2F4F3', color: '#0E7C7B' }}
+              >
+                Resend Invite
+              </button>
+            )}
             <button
               onClick={() => { onDelete(contact.id); setShowActions(false); }}
               className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95"

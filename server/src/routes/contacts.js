@@ -7,23 +7,26 @@ const {
   createContact,
   updateContact,
   deleteContact,
+  resendInvite,
 } = require('../controllers/contactsController');
 
+const PHONE_REGEX = /^\+[1-9]\d{6,14}$/;
+
 const contactValidation = [
-  body('full_name').trim().notEmpty().withMessage('Full name is required'),
-  body('phone').trim().notEmpty().withMessage('SMS phone number is required'),
+  body('contact_name').trim().notEmpty().withMessage('Full name is required'),
+  body('phone_number').trim().notEmpty().withMessage('Phone number is required')
+    .matches(PHONE_REGEX).withMessage('Enter a valid phone number with country code, e.g. +2348000000000'),
   body('relationship').trim().notEmpty().withMessage('Relationship is required'),
-  body('email').trim().notEmpty().withMessage('Working email is required').isEmail().withMessage('Invalid email'),
-  body('notification_enabled').optional().isBoolean(),
+  body('priority').optional().isInt({ min: 1, max: 3 }).withMessage('Priority must be between 1 and 3'),
 ];
 
 const contactUpdateValidation = [
   param('id').trim().notEmpty().withMessage('Invalid contact id'),
-  body('full_name').optional().trim().notEmpty().withMessage('Full name is required'),
-  body('phone').optional().trim().notEmpty().withMessage('SMS phone number is required'),
+  body('contact_name').optional().trim().notEmpty().withMessage('Full name is required'),
+  body('phone_number').optional().trim()
+    .matches(PHONE_REGEX).withMessage('Enter a valid phone number with country code, e.g. +2348000000000'),
   body('relationship').optional().trim().notEmpty().withMessage('Relationship is required'),
-  body('email').optional().trim().notEmpty().withMessage('Working email is required').isEmail().withMessage('Invalid email'),
-  body('notification_enabled').optional().isBoolean(),
+  body('priority').optional().isInt({ min: 1, max: 3 }).withMessage('Priority must be between 1 and 3'),
 ];
 
 router.use(authenticate);
@@ -32,5 +35,6 @@ router.get('/', getContacts);
 router.post('/', contactValidation, validate, createContact);
 router.put('/:id', contactUpdateValidation, validate, updateContact);
 router.delete('/:id', [param('id').trim().notEmpty().withMessage('Invalid contact id')], validate, deleteContact);
+router.post('/:id/resend-invite', [param('id').trim().notEmpty().withMessage('Invalid contact id')], validate, resendInvite);
 
 module.exports = router;

@@ -35,12 +35,19 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
-          full_name: string;
-          phone: string;
-          email: string | null;
+          contact_name: string;
+          phone_number: string;
           relationship: string;
-          notification_enabled: boolean;
+          priority: number;
+          invite_status: 'pending_invite' | 'accepted' | 'push_enabled' | 'push_disabled' | 'whatsapp_only';
+          invite_token: string;
+          invite_link: string;
+          whatsapp_invite_sent_at: string | null;
+          accepted_at: string | null;
+          push_enabled: boolean;
+          push_token: string | null;
           created_at: string;
+          updated_at: string;
         };
       };
     };

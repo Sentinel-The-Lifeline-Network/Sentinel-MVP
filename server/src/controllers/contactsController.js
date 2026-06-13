@@ -12,13 +12,12 @@ const getContacts = async (req, res, next) => {
 
 const createContact = async (req, res, next) => {
   try {
-    const { full_name, phone, email, relationship, notification_enabled } = req.body;
+    const { contact_name, phone_number, relationship, priority } = req.body;
     const data = await contactsService.createContact(req.user.id, {
-      full_name,
-      phone,
-      email: email || null,
+      contact_name,
+      phone_number,
       relationship,
-      notification_enabled: notification_enabled !== false,
+      priority,
     });
     success(res, data, 201);
   } catch (err) {
@@ -47,4 +46,13 @@ const deleteContact = async (req, res, next) => {
   }
 };
 
-module.exports = { getContacts, createContact, updateContact, deleteContact };
+const resendInvite = async (req, res, next) => {
+  try {
+    const data = await contactsService.resendInvite(req.user.id, req.params.id);
+    success(res, data);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getContacts, createContact, updateContact, deleteContact, resendInvite };

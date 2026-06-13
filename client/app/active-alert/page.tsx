@@ -21,7 +21,7 @@ const formatElapsed = (totalSeconds: number) => {
 
 type NotificationSummary = NonNullable<SOSAlert['notification_summary']>;
 
-const summarizeNotificationRecords = (records: NonNullable<SOSAlert['alert_notifications']>): NotificationSummary => {
+const summarizeNotificationRecords = (records: NonNullable<SOSAlert['notifications_log']>): NotificationSummary => {
   const failures = records
     .filter((record) => record.status === 'failed')
     .map((record) => ({
@@ -101,7 +101,7 @@ export default function ActiveAlertPage() {
       attempts += 1;
       try {
         const latest = await sosService.getById(alert.id);
-        const records = latest.alert_notifications || [];
+        const records = latest.notifications_log || [];
         if (records.length > 0 && !cancelled) {
           setNotificationSummary(summarizeNotificationRecords(records));
           setShowNotificationPopup(true);
@@ -124,8 +124,9 @@ export default function ActiveAlertPage() {
   const timelineSteps = [
     { label: 'Alert triggered', time: alert?.started_at ? new Date(alert.started_at).toLocaleTimeString() : undefined, done: true },
     { label: 'Location captured', time: alert?.last_location_timestamp ? new Date(alert.last_location_timestamp).toLocaleTimeString() : undefined, done: !!alert?.last_latitude },
-    { label: 'WhatsApp/SMS and email alerts sent automatically', done: alert?.sync_status !== 'pending' },
-    { label: 'Repeat notifications active every 5 minutes', done: alert?.sync_status !== 'pending' },
+    { label: 'WhatsApp and push alerts sent automatically', done: alert?.sync_status !== 'pending' },
+    { label: 'Push reminders active every 5 minutes', done: alert?.sync_status !== 'pending' },
+    { label: 'WhatsApp reminder after 24 hours if still active', done: alert?.sync_status !== 'pending' },
     { label: 'Live location tracking active', done: state === 'active' },
   ];
 
@@ -190,7 +191,7 @@ export default function ActiveAlertPage() {
                   </p>
                   <p className="text-xs text-muted mt-1 leading-relaxed">
                     {notificationSummary.status === 'queued'
-                      ? 'WhatsApp/SMS and email are being sent in the background. This screen will update shortly.'
+                      ? 'WhatsApp and push notifications are being sent in the background. This screen will update shortly.'
                       : `${notificationSummary.sentCount} sent, ${notificationSummary.failedCount} failed across ${notificationSummary.contactCount} contact(s).`}
                   </p>
                   {notificationSummary.failures.length > 0 && (
@@ -247,7 +248,7 @@ export default function ActiveAlertPage() {
           <div className="grid grid-cols-3 gap-2">
             {[
               { label: 'GPS', value: alert?.last_latitude ? 'Active' : 'Searching', color: alert?.last_latitude ? '#1F5A47' : '#6B6B6B', icon: 'GPS' },
-              { label: 'Contacts', value: alert?.sync_status === 'pending' ? 'Queued' : 'Auto-sent', color: alert?.sync_status === 'pending' ? '#6B6B6B' : '#1F5A47', icon: 'SMS' },
+              { label: 'Contacts', value: alert?.sync_status === 'pending' ? 'Queued' : 'Auto-sent', color: alert?.sync_status === 'pending' ? '#6B6B6B' : '#1F5A47', icon: 'WA' },
               { label: 'Tracking', value: trackingUrl ? 'Live' : 'Pending', color: trackingUrl ? '#C53A2D' : '#6B6B6B', icon: 'LIVE' },
             ].map((s) => (
               <div key={s.label} className="sentinel-card rounded-2xl p-3 text-center">
@@ -277,7 +278,7 @@ export default function ActiveAlertPage() {
                   </div>
                   <div>
                     <p className="text-sm font-bold" style={{ color: '#151515' }}>Contacts notified automatically</p>
-                    <p className="text-xs text-muted mt-0.5">Sentinel tries WhatsApp first, falls back to SMS when needed, and sends email immediately from the SOS request. Repeat messages continue every 5 minutes until you mark safe or cancel.</p>
+                    <p className="text-xs text-muted mt-0.5">Sentinel sends a WhatsApp alert to every emergency contact and a push notification to contacts who enabled push. Push reminders repeat every 5 minutes; a WhatsApp reminder follows only if the alert is still active after 24 hours. All of this stops the moment you mark safe or cancel.</p>
                   </div>
                 </div>
               </div>

@@ -36,7 +36,6 @@ export default function ContactNotifier({ contacts, trackingUrl, userName, alert
   const [notified, setNotified] = useState<NotifyState>({});
   const [copied, setCopied] = useState(false);
 
-  const enabledContacts = contacts.filter((c) => c.notification_enabled);
   const message = buildMessage(userName, trackingUrl, alertTime);
   const encodedMessage = encodeURIComponent(message);
 
@@ -50,9 +49,9 @@ export default function ContactNotifier({ contacts, trackingUrl, userName, alert
     } catch {}
   };
 
-  const smsUrl = (phone: string) => `sms:${phone}?body=${encodedMessage}`;
+  const whatsappUrl = (phone: string) => `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodedMessage}`;
 
-  if (enabledContacts.length === 0) {
+  if (contacts.length === 0) {
     return (
       <div className="sentinel-card rounded-2xl p-4 text-center">
         <p className="text-sm text-muted">No contacts set for notification.</p>
@@ -83,9 +82,9 @@ export default function ContactNotifier({ contacts, trackingUrl, userName, alert
       </button>
 
       {/* Contact rows */}
-      {enabledContacts.map((contact, i) => {
+      {contacts.map((contact, i) => {
         const isSent = notified[contact.id] === 'sent';
-        const initials = contact.full_name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+        const initials = contact.contact_name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 
         return (
           <motion.div
@@ -103,8 +102,8 @@ export default function ContactNotifier({ contacts, trackingUrl, userName, alert
                 {initials}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold truncate" style={{ color: '#151515' }}>{contact.full_name}</p>
-                <p className="text-xs text-muted truncate">{contact.relationship} · {contact.phone}</p>
+                <p className="text-sm font-semibold truncate" style={{ color: '#151515' }}>{contact.contact_name}</p>
+                <p className="text-xs text-muted truncate">{contact.relationship} · {contact.phone_number}</p>
               </div>
               {isSent && (
                 <span
@@ -118,17 +117,19 @@ export default function ContactNotifier({ contacts, trackingUrl, userName, alert
 
             <div className="grid grid-cols-2 gap-2">
               <a
-                href={smsUrl(contact.phone)}
+                href={whatsappUrl(contact.phone_number)}
                 onClick={() => markSent(contact.id)}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-95"
                 style={{ background: '#EDE0DD', color: '#C53A2D', border: '1px solid #E7E0D7' }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                SMS
+                WhatsApp
               </a>
 
               <a
-                href={`tel:${contact.phone}`}
+                href={`tel:${contact.phone_number}`}
                 className="flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-95"
                 style={{ background: '#F7F4EE', color: '#0B3D2E', border: '1px solid #E7E0D7' }}
               >

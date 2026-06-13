@@ -5,6 +5,10 @@ const generateTrackingToken = () => {
   return crypto.randomBytes(20).toString('hex');
 };
 
+const generateInviteToken = () => {
+  return crypto.randomBytes(20).toString('hex');
+};
+
 const generateId = () => uuidv4();
 
-module.exports = { generateTrackingToken, generateId };
+module.exports = { generateTrackingToken, generateInviteToken, generateId };
