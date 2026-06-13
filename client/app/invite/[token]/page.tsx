@@ -136,7 +136,7 @@ export default function InvitePage({ params }: { params: { token: string } }) {
           </p>
         )}
 
-        {error && step !== 'error' && (
+        {error && (
           <p className="text-sm font-medium mt-4" style={{ color: '#C53A2D' }}>{error}</p>
         )}
       </motion.div>
