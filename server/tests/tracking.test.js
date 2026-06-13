@@ -7,6 +7,7 @@ jest.mock('../src/config/supabase', () => ({
   eq: jest.fn().mockReturnThis(),
   order: jest.fn().mockReturnThis(),
   single: jest.fn(),
+  insert: jest.fn().mockResolvedValue({ error: null }),
   auth: { getUser: jest.fn() },
 }));
 

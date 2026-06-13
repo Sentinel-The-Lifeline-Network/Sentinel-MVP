@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0B0D12;
+  --surface: #11151C;
+  --card: #161B24;
+  --border: #232A36;
+  --primary: #34D399;
+  --muted: #8A93A6;
+  --danger: #F2545B;
+  --warning: #F2B33D;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: var(--background);
+  color: #E6E9EF;
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 0;
+}

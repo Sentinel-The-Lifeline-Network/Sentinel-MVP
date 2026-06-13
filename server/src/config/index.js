@@ -46,4 +46,5 @@ module.exports = {
     clientEmail: cleanEnv(process.env.FIREBASE_CLIENT_EMAIL),
     privateKey: cleanEnv(process.env.FIREBASE_PRIVATE_KEY)?.replace(/\\n/g, '\n'),
   },
+  adminApiKey: cleanEnv(process.env.ADMIN_API_KEY),
 };

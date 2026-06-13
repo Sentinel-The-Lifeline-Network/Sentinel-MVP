@@ -223,6 +223,22 @@ CREATE POLICY "responder_actions_policy" ON responder_actions
 CREATE INDEX IF NOT EXISTS idx_responder_actions_alert_id ON responder_actions(alert_id);
 
 -- ============================================================
+-- TRACKING LINK VIEWS
+-- Records each view of a shared live-tracking link (admin dashboard)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS tracking_link_views (
+  id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  alert_id   UUID NOT NULL REFERENCES sos_alerts(id) ON DELETE CASCADE,
+  viewed_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  user_agent TEXT
+);
+
+ALTER TABLE tracking_link_views ENABLE ROW LEVEL SECURITY;
+
+CREATE INDEX IF NOT EXISTS idx_tracking_link_views_alert_id ON tracking_link_views(alert_id);
+CREATE INDEX IF NOT EXISTS idx_tracking_link_views_viewed_at ON tracking_link_views(viewed_at);
+
+-- ============================================================
 -- SUPABASE REALTIME
 -- Enable realtime for live tracking
 -- ============================================================

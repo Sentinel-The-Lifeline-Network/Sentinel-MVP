@@ -14,6 +14,13 @@ const getTrackingData = async (req, res, next) => {
 
     if (dbError || !alert) return error(res, 'Tracking link not found or expired', 404);
 
+    supabase
+      .from('tracking_link_views')
+      .insert({ alert_id: alert.id, user_agent: req.headers['user-agent'] || null })
+      .then(({ error: insertError }) => {
+        if (insertError) console.error('Failed to log tracking link view:', insertError.message);
+      });
+
     const locationHistory = await locationService.getLocationHistory(alert.id);
 
     success(res, {

@@ -44,6 +44,7 @@ app.use('/api/contacts', require('./routes/contacts'));
 app.use('/api/invite', require('./routes/invite'));
 app.use('/api/sos', require('./routes/sos'));
 app.use('/api/tracking', require('./routes/tracking'));
+app.use('/api/admin', require('./routes/admin'));
 
 app.use(notFound);
 app.use(errorHandler);
