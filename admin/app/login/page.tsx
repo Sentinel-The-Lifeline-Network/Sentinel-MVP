@@ -54,7 +54,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={busy}
-          className="w-full mt-4 py-3 rounded-xl text-sm font-semibold bg-primary text-black disabled:opacity-60"
+          className="w-full mt-4 py-3 rounded-xl text-sm font-semibold bg-primary text-white disabled:opacity-60"
         >
           {busy ? 'Checking...' : 'Sign in'}
         </button>

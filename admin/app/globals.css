@@ -3,14 +3,16 @@
 @tailwind utilities;
 
 :root {
-  --background: #0B0D12;
-  --surface: #11151C;
-  --card: #161B24;
-  --border: #232A36;
-  --primary: #34D399;
-  --muted: #8A93A6;
-  --danger: #F2545B;
-  --warning: #F2B33D;
+  --background: #F7F4EE;
+  --surface: #FFFFFF;
+  --card: #FFFFFF;
+  --border: #E7E0D7;
+  --primary: #0B3D2E;
+  --primary-light: #1F5A47;
+  --muted: #6B6B6B;
+  --danger: #C53A2D;
+  --warning: #C9A227;
+  --text: #151515;
 }
 
 * {
@@ -20,8 +22,8 @@
 html,
 body {
   background-color: var(--background);
-  color: #E6E9EF;
-  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  font-family: var(--font-body), system-ui, sans-serif;
   margin: 0;
   padding: 0;
 }

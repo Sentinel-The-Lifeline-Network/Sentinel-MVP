@@ -1,0 +1,8 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="112" fill="#F7F4EE"/>
+  <rect x="36" y="36" width="440" height="440" rx="92" fill="#FFFFFF" stroke="#E7E0D7" stroke-width="12"/>
+  <circle cx="256" cy="266" r="132" fill="#C53A2D"/>
+  <path d="M256 116L354 155V252C354 344 256 398 256 398C256 398 158 344 158 252V155L256 116Z" stroke="#FFFFFF" stroke-width="30" stroke-linejoin="round"/>
+  <text x="256" y="292" text-anchor="middle" fill="#FFFFFF" font-family="Manrope, Arial, sans-serif" font-size="64" font-weight="900" letter-spacing="4">SOS</text>
+  <circle cx="256" cy="74" r="14" fill="#0B3D2E"/>
+</svg>

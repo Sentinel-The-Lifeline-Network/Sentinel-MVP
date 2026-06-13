@@ -72,7 +72,7 @@ export default function DashboardPage() {
         </div>
         <button
           onClick={handleLogout}
-          className="text-xs px-3 py-2 rounded-lg border border-border text-muted hover:text-white"
+          className="text-xs px-3 py-2 rounded-lg border border-border text-muted hover:text-primary"
         >
           Sign out
         </button>
@@ -117,7 +117,7 @@ export default function DashboardPage() {
                 <div className="flex gap-4 text-sm text-muted mt-1">
                   {Object.entries(statuses).map(([status, count]) => (
                     <span key={status}>
-                      {status}: <span className="text-white font-medium">{count}</span>
+                      {status}: <span className="font-medium">{count}</span>
                     </span>
                   ))}
                 </div>
